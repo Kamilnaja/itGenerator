@@ -34,9 +34,9 @@
     }
 
     class Pesel extends Generator {
-        super(){ }
         
         constructor() {
+            super()
             this.exampleValues = [
                 23022303829, 18321028870, 16320716352, 92051015519
             ];
