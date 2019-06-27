@@ -1,50 +1,45 @@
 (() => {
-    function getRandomInt(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
+
+
     class Generator {
-        constructor(values) {
-            this.exampleValues = values;
+        getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
         }
-        generate() {
-            const rand = getRandomInt(0, this.exampleValues.length);
-            console.log(this.exampleValues[rand]);
+
+        getRandom() {
+            const rand = this.getRandomInt(0, this.exampleValues.length);
+            return this.getRandomInt(0, this.exampleValues.length);
         };
-    }
 
-    class Regon {
-        constructor() {
-            this.exampleValues = [];
-        }
-
-        generate() {
-
+        getGenerated() {
+            return `${this.name} : ${this.exampleValues[this.getRandom()]} gen : ${this.getRandom()}`
         }
     }
 
-    class Iban {
+    class Regon extends Generator {
         constructor() {
-            this.exampleValues = [33937010598015424872480179, 56124047643090906395648234, 80917700086215672742767919, 54910110425937909896107589];
+            super()
+            this.name = "REGON"
+            this.exampleValues = [1, 2, 3];
         }
-        generate() {
+    }
 
+    class Iban extends Generator {
+        constructor() {
+            super();
+            this.exampleValues = ['33937010598015424872480179', '56124047643090906395648234', '80917700086215672742767919', '54910110425937909896107589'];
+            this.name = "IBAN"
         }
     }
 
     class Pesel extends Generator {
-        
         constructor() {
-            super()
+            super();
             this.exampleValues = [
-                23022303829, 18321028870, 16320716352, 92051015519
+                23022303829
             ];
+            this.name = "PESEL"
         }
-        generate() {
-            const rand = getRandomInt(0, this.exampleValues.length);
-            console.log(this.exampleValues[rand]);
-        };
     };
 
     class Nip {
@@ -52,17 +47,15 @@
     }
 
     function generate() {
-        console.log('generated values');
-        regon = new Regon();
-        regon.generate();
-
         pesel = new Pesel();
-        pesel.generate();
+        console.log(pesel.getGenerated());
 
-        iban = new Iban();
-        console.log(`iban : ${iban.generate()};`);
-        
-        
+        // iban = new Iban();
+        // console.log(iban.getGenerated());
+
+        // regon = new Regon();
+        // console.log(regon.getGenerated());
+
     }
 
     generate();
