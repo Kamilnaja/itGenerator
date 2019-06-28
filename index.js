@@ -1,14 +1,19 @@
 (() => {
+    config = {
 
+    }
 
     class Generator {
         getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
+            const generatedNum = Math.floor(Math.random() * (max - min + 1)) + min;
+            console.log(generatedNum);
+            
+            return generatedNum;
         }
 
         getRandom() {
-            const rand = this.getRandomInt(0, this.exampleValues.length);
-            return this.getRandomInt(0, this.exampleValues.length);
+            const rand = this.getRandomInt(0, this.exampleValues.length - 1);
+            return rand;
         };
 
         getGenerated() {
@@ -36,7 +41,7 @@
         constructor() {
             super();
             this.exampleValues = [
-                23022303829
+                '23022303829', '01251220809'
             ];
             this.name = "PESEL"
         }
