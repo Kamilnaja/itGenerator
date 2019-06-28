@@ -6,8 +6,6 @@
     class Generator {
         getRandomInt(min, max) {
             const generatedNum = Math.floor(Math.random() * (max - min + 1)) + min;
-            console.log(generatedNum);
-            
             return generatedNum;
         }
 
@@ -16,8 +14,8 @@
             return rand;
         };
 
-        getGenerated() {
-            return `${this.name} : ${this.exampleValues[this.getRandom()]} gen : ${this.getRandom()}`
+        get getGenerated() {
+            return `${this.name} : ${this.exampleValues[this.getRandom()]}`
         }
     }
 
@@ -53,14 +51,13 @@
 
     function generate() {
         pesel = new Pesel();
-        console.log(pesel.getGenerated());
+        console.log(pesel.getGenerated);
 
-        // iban = new Iban();
-        // console.log(iban.getGenerated());
+        iban = new Iban();
+        console.log(iban.getGenerated);
 
-        // regon = new Regon();
-        // console.log(regon.getGenerated());
-
+        regon = new Regon();
+        console.log(regon.getGenerated);
     }
 
     generate();
