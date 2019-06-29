@@ -1,0 +1,24 @@
+{
+  "name": "itGenerator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kamilnaja/itGenerator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kamilnaja/itGenerator/issues"
+  },
+  "homepage": "https://github.com/Kamilnaja/itGenerator#readme",
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-config-google": "^0.13.0"
+  }
+}
