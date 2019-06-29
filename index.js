@@ -1,10 +1,10 @@
 (() => {
     config = {
         pesel: {
-            birthDay: '',
-            birthMonth: '12',
-            birthYear: '08',
-            sex: 'G'
+            birthDay: '', // ex 20
+            birthMonth: '12', // ex 12
+            birthYear: '1988', // ex 1988
+            sex: 'M' // M or F
         }
     }
 
@@ -52,15 +52,19 @@
         }
 
         generateCustomPesel() {
-            console.log(config.pesel.sex);
+            this.generatedPesel.push(this.setYear());
+            this.generatedPesel.push(this.setMonth());
+            this.generatedPesel.push(this.setDay());
 
-            this.generatedPesel[0] = this.setYear();
-            this.generatedPesel[1] = this.setMonth();
-            this.generatedPesel[2] = this.setDay();
-            this.generatedPesel[3] = this.setSex();
+            for (let i = 0; i < 3; i++) {
+                this.generatedPesel.push(this.getRandomInt(0, 9));
+            }
+
+            this.generatedPesel.push(this.setSex());
+            this.generatedPesel.push(this.calculateCheckSum(this.generatedPesel.join('')));
             console.log(this.generatedPesel);
-
-            return this.generatedPesel.join('')
+            
+            return this.generatedPesel.join('');
         }
 
         setDay() {
@@ -153,8 +157,15 @@
             return nums[this.getRandomInt(0, nums.length - 1)];
         }
 
-        validatePesel() {
+        calculateCheckSum(pesel) {
+            console.log(`typeof pesel :${typeof pesel}, pesel ${pesel}`);
 
+            const weights = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
+            const checkSum = (10 - (String(pesel).split('')
+                .map((value, index, array) => Number(value) * weights[index])
+                .reduce((a, b) => a + b, 0) % 10) % 10)
+            console.log(checkSum);
+            return checkSum;
         }
     };
 
