@@ -1,9 +1,9 @@
 (() => {
     config = {
         pesel: {
-            birthDay: '', // ex 20
-            birthMonth: '12', // ex 12
-            birthYear: '1988', // ex 1988
+            birthDay: '03', // ex 20
+            birthMonth: '03', // ex 12
+            birthYear: '2003', // ex 1988
             sex: 'M' // M or F
         }
     }
@@ -62,8 +62,6 @@
 
             this.generatedPesel.push(this.setSex());
             this.generatedPesel.push(this.calculateCheckSum(this.generatedPesel.join('')));
-            console.log(this.generatedPesel);
-            
             return this.generatedPesel.join('');
         }
 
@@ -88,17 +86,34 @@
         setMonth() {
             let month;
             if (config.pesel.birthMonth) {
-                if (Number(config.pesel.birthMonth) > 12) {
-                    console.log('Wrong month value, generate my own');
-                    month = this.generateRandomMonth();
-                } else if (config.pesel.birthMonth.length === 1) {
-                    month = `0${config.pesel.birthMonth}`;
-                } else if (config.pesel.birthMonth.length === 2) {
-                    month = `${config.pesel.birthMonth}`
-                }
+                month = this.calculatePeselMonth(month);
             } else {
                 console.log('No month value, generate my own')
                 month = this.generateRandomMonth();
+            }
+            return month;
+        }
+
+        calculatePeselMonth(month) {
+            const year = Number(config.pesel.birthYear);
+            if (Number(config.pesel.birthMonth) > 12) {
+                console.log('Wrong month value, generate my own');
+                month = this.generateRandomMonth();
+            }
+            else if (year >= 1800 && year <= 1899) {
+                month = Number(config.pesel.birthMonth) + 80;
+            }
+            else if (year >= 1900 && year <= 1990) {
+                month = config.pesel.birthMonth;
+            }
+            else if (year >= 2000 && year <= 2099) {
+                month = Number(config.pesel.birthMonth) + 20;
+            }
+            else if (year >= 2100 && year <= 2199) {
+                month = Number(config.pesel.birthMonth) + 40;
+            }
+            else if (year >= 2200 && year <= 2299) {
+                month = Number(config.pesel.birthMonth) + 60;
             }
             return month;
         }
@@ -140,15 +155,14 @@
         }
 
         setYear() {
-            let year = '88'
+            let year;
             if (config.pesel.birthYear) {
-                console.log(`by : ${config.pesel.birthYear}`);
                 if (String(config.pesel.birthYear).length === 4) {
                     year = String(config.pesel.birthYear).slice(2, 4);
                 }
-                else if (String(config.pesel.birthYear).length === 2) {
-                    year = String(config.pesel.birthYear);
-                }
+            } else {
+                console.log('bad year value!');
+
             }
             return year;
         }
@@ -158,13 +172,12 @@
         }
 
         calculateCheckSum(pesel) {
-            console.log(`typeof pesel :${typeof pesel}, pesel ${pesel}`);
-
+            let checkSum;
             const weights = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
-            const checkSum = (10 - (String(pesel).split('')
-                .map((value, index, array) => Number(value) * weights[index])
-                .reduce((a, b) => a + b, 0) % 10) % 10)
-            console.log(checkSum);
+            const numsSumTimesWeights = String(pesel).split('')
+                .map((value, index) => Number(value) * weights[index])
+                .reduce((a, b) => a + b, 0);
+            checkSum = (10 - (numsSumTimesWeights % 10)) % 10;
             return checkSum;
         }
     };
@@ -175,9 +188,7 @@
 
     function generate() {
         pesel = new Pesel();
-        // console.log(pesel.getGenerated);
-        console.log(pesel.generateCustomPesel());
-
+        console.log(`pesel: ${pesel.generateCustomPesel()}`);
 
         // iban = new Iban();
         // console.log(iban.getGenerated);
