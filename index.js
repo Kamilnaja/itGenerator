@@ -2,7 +2,7 @@
     config = {
         pesel: {
             birthDay: 28,
-            birthMonth: 12,
+            birthMonth: '12',
             birthYear: '08',
             sex: 'F'
         }
@@ -54,21 +54,42 @@
         generateCustomPesel() {
             console.log(config.pesel.sex);
 
-            this.setMonth();
-
             this.generatedPesel[0] = this.setYear();
-            this.generatedPesel[1] = config.pesel.birthMonth;
+            this.generatedPesel[1] = this.setMonth();
             this.generatedPesel[2] = config.pesel.birthDay;
             this.generatedPesel[3] = this.setSex();
             console.log(this.generatedPesel);
-            
+
             return this.generatedPesel.join('')
         }
+        
+        setMonth() {
+            let month;
+            if (config.pesel.birthMonth === '') {
+                console.log('No month value, generate my own')
+                month = this.generateRandomMonth();
+            } 
 
-        setMonth(){
-            // if (config.pesel.birthDay) {
-            //     this.day
-            // }
+            if (config.pesel.birthMonth) {
+                if (Number(config.pesel.birthMonth) > 12) {
+                    console.log('Wrong month value, generate my own');
+                    month = this.generateRandomMonth();
+                } else if (config.pesel.birthMonth.length === 1) {
+                    month = `0${config.pesel.birthMonth}`;
+                } else if (config.pesel.birthMonth.length === 2){
+                    month = config.pesel.birthMonth;
+                }
+            }
+            return month;
+        }
+
+        generateRandomMonth () {
+            const rand = this.getRandomInt(1, 12);
+            if (String(rand).length === 1) {
+                return `0${rand}`
+            } else {
+                return String(rand);
+            }
         }
 
         setSex() {
@@ -92,7 +113,6 @@
             let year = '88'
             if (config.pesel.birthYear) {
                 console.log(`by : ${config.pesel.birthYear}`);
-                
                 if (String(config.pesel.birthYear).length === 4) {
                     year = String(config.pesel.birthYear).slice(2, 4);
                 }
