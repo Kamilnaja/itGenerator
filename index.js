@@ -1,6 +1,11 @@
 (() => {
     config = {
-
+        pesel: {
+            birthDay: 28,
+            birthMonth: 12,
+            birthYear: '08',
+            sex: 'F'
+        }
     }
 
     class Generator {
@@ -42,6 +47,68 @@
                 '23022303829', '01251220809'
             ];
             this.name = "PESEL"
+            this.generatedPesel = [];
+            this.sexNumber = '';
+        }
+
+        generateCustomPesel() {
+            console.log(config.pesel.sex);
+
+            this.setMonth();
+
+            this.generatedPesel[0] = this.setYear();
+            this.generatedPesel[1] = config.pesel.birthMonth;
+            this.generatedPesel[2] = config.pesel.birthDay;
+            this.generatedPesel[3] = this.setSex();
+            console.log(this.generatedPesel);
+            
+            return this.generatedPesel.join('')
+        }
+
+        setMonth(){
+            // if (config.pesel.birthDay) {
+            //     this.day
+            // }
+        }
+
+        setSex() {
+            let sex;
+            if (config.pesel.sex === 'F') {
+                const nums = [0, 2, 4, 6, 8];
+                sex = this.getRandomTableItem(nums);
+            }
+            else if (config.pesel.sex === 'M') {
+                const nums = [1, 3, 5, 7, 9];
+                sex = this.getRandomTableItem(nums);
+            }
+            else {
+                const nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+                sex = this.getRandomTableItem(nums);
+            }
+            return sex;
+        }
+
+        setYear() {
+            let year = '88'
+            if (config.pesel.birthYear) {
+                console.log(`by : ${config.pesel.birthYear}`);
+                
+                if (String(config.pesel.birthYear).length === 4) {
+                    year = String(config.pesel.birthYear).slice(2, 4);
+                }
+                else if (String(config.pesel.birthYear).length === 2) {
+                    year = String(config.pesel.birthYear);
+                }
+            }
+            return year;
+        }
+
+        getRandomTableItem(nums) {
+            return nums[this.getRandomInt(0, nums.length - 1)];
+        }
+
+        validatePesel() {
+
         }
     };
 
@@ -51,13 +118,15 @@
 
     function generate() {
         pesel = new Pesel();
-        console.log(pesel.getGenerated);
+        // console.log(pesel.getGenerated);
+        console.log(pesel.generateCustomPesel());
 
-        iban = new Iban();
-        console.log(iban.getGenerated);
 
-        regon = new Regon();
-        console.log(regon.getGenerated);
+        // iban = new Iban();
+        // console.log(iban.getGenerated);
+
+        // regon = new Regon();
+        // console.log(regon.getGenerated);
     }
 
     generate();
