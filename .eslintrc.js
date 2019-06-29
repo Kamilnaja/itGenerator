@@ -11,11 +11,15 @@ module.exports = {
     'SharedArrayBuffer': 'readonly',
   },
   'parserOptions': {
-    'ecmaVersion': 2018,
-    'sourceType': 'module',
+    "parser": "babel-eslint",
+    "parserOptions": {
+      "sourceType": "module",
+      "allowImportExportEverywhere": true
+    }
   },
   'rules': {
     "indent": ["error", 4],
-    "require-jsdoc": 0
+    "require-jsdoc": 0,
+    "max-len": ["error", {"code": 120}]
   },
 };
