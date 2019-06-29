@@ -47,7 +47,7 @@
     }
 
     class Pesel extends Generator {
-        constructor() {
+        constructor(year, month, day) {
             super();
             this.name = 'PESEL';
             this.weights = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
@@ -67,16 +67,16 @@
                 'November',
                 'December',
             ];
-            this.year;
-            this.month;
-            this.day;
+            this.year = year;
+            this.month = month;
+            this.day = day;
         }
 
         generate() {
             const generatedPesel = [];
-            generatedPesel.push(this.setYear());
-            generatedPesel.push(this.setMonth());
-            generatedPesel.push(this.setDay());
+            generatedPesel.push(this.setYear(this.year));
+            generatedPesel.push(this.setMonth(this.month));
+            generatedPesel.push(this.setDay(this.day));
 
             for (let i = 0; i < 3; i++) {
                 generatedPesel.push(this.getRandomInt(0, 9));
@@ -89,9 +89,9 @@
             return generatedPesel.join('');
         }
 
-        setDay() {
+        setDay(givenDay) {
             let day;
-            const birthDay = config.pesel.birthDay;
+            const birthDay = givenDay;
 
             if (!birthDay) {
                 console.warn('Missing value: config.pesel.birthDay');
@@ -120,13 +120,15 @@
             return day;
         }
 
-        setMonth() {
+        setMonth(givenMonth) {
+            console.log(`${givenMonth} gm`);
+
             let month;
-            if (config.pesel.birthMonth > 12 || !config.pesel.birthMonth) {
+            if (Number(givenMonth) > 12 || !givenMonth) {
                 console.log(`Wrong month value : ${config.pesel.birthMonth}`);
                 month = this.generateRandomMonth();
             } else if (config.pesel.birthMonth <= 12) {
-                month = this.calculatePeselMonth(month);
+                month = this.calculatePeselMonth(givenMonth);
             }
             return month;
         }
@@ -184,13 +186,13 @@
             return sex;
         }
 
-        setYear() {
+        setYear(givenYear) {
             let year;
-            if (!config.pesel.birthYear) {
+            if (!givenYear) {
                 console.log(`No year value. Generate my own`);
                 year = String(this.generateRandomYear()).slice(2, 4);
-            } else if (String(config.pesel.birthYear).length === 4) {
-                year = String(config.pesel.birthYear).slice(2, 4);
+            } else if (String(givenYear).length === 4) {
+                year = String(givenYear).slice(2, 4);
             }
             return year;
         };
@@ -234,8 +236,8 @@
     }
 
     function generate() {
-        const pesel = new Pesel();
-        console.log(`pesel: ${pesel.generate()}`);
+        const pesel = new Pesel('2018', '02', '02');
+        // console.log(`pesel: ${pesel.generate()}`);
 
         // iban = new Iban();
         // console.log(iban.getGenerated);
@@ -247,11 +249,15 @@
 
 
     function testPesel() {
-        const pesel = new Pesel();
-
-        const newPesel = pesel.generate();
+        const pesel1 = new Pesel('1928', '07', '12');
+        const newPesel = pesel1.generate();
         console.log(`new test pesel: ${newPesel}`);
-        console.assert(pesel.validatePesel(newPesel) === true);
+        console.assert(pesel1.validatePesel(newPesel) === true);
+
+        const pesel2 = new Pesel('1928', '07', '12');
+        const newPesel2 = pesel2.generate();
+        console.log(`new test pesel: ${newPesel2}`);
+        console.assert(pesel2.validatePesel(newPesel2) === true);
     }
 
     testPesel();
