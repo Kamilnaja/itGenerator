@@ -1,10 +1,10 @@
 (() => {
     config = {
         pesel: {
-            birthDay: 28,
+            birthDay: '',
             birthMonth: '12',
             birthYear: '08',
-            sex: 'F'
+            sex: 'G'
         }
     }
 
@@ -56,35 +56,60 @@
 
             this.generatedPesel[0] = this.setYear();
             this.generatedPesel[1] = this.setMonth();
-            this.generatedPesel[2] = config.pesel.birthDay;
+            this.generatedPesel[2] = this.setDay();
             this.generatedPesel[3] = this.setSex();
             console.log(this.generatedPesel);
 
             return this.generatedPesel.join('')
         }
-        
+
+        setDay() {
+            let day;
+            if (config.pesel.birthDay) {
+                if (Number(config.pesel.birthDay) > 31) {
+                    console.log(`Wrong day value ${config.pesel.birthDay}`);
+                    day = this.generateRandomDay();
+                } else if (config.pesel.birthDay.length === 1) {
+                    day = `0${config.pesel.birthDay}`
+                } else if (config.pesel.birthDay.length === 2) {
+                    day = `${config.pesel.birthDay}`
+                }
+            } else {
+                console.log('No day value, generate my own');
+                day = this.generateRandomDay();
+            }
+            return day;
+        }
+
         setMonth() {
             let month;
-            if (config.pesel.birthMonth === '') {
-                console.log('No month value, generate my own')
-                month = this.generateRandomMonth();
-            } 
-
             if (config.pesel.birthMonth) {
                 if (Number(config.pesel.birthMonth) > 12) {
                     console.log('Wrong month value, generate my own');
                     month = this.generateRandomMonth();
                 } else if (config.pesel.birthMonth.length === 1) {
                     month = `0${config.pesel.birthMonth}`;
-                } else if (config.pesel.birthMonth.length === 2){
-                    month = config.pesel.birthMonth;
+                } else if (config.pesel.birthMonth.length === 2) {
+                    month = `${config.pesel.birthMonth}`
                 }
+            } else {
+                console.log('No month value, generate my own')
+                month = this.generateRandomMonth();
             }
             return month;
         }
 
-        generateRandomMonth () {
+        generateRandomMonth() {
             const rand = this.getRandomInt(1, 12);
+            if (String(rand).length === 1) {
+                return `0${rand}`
+            } else {
+                return String(rand);
+            }
+        }
+
+        generateRandomDay() {
+            const rand = this.getRandomInt(1, 31);
             if (String(rand).length === 1) {
                 return `0${rand}`
             } else {
@@ -94,16 +119,17 @@
 
         setSex() {
             let sex;
+            const femaleNums = [0, 2, 4, 6, 8];
+            const maleNums = [1, 3, 5, 7, 9];
             if (config.pesel.sex === 'F') {
-                const nums = [0, 2, 4, 6, 8];
-                sex = this.getRandomTableItem(nums);
+                sex = this.getRandomTableItem(femaleNums);
             }
             else if (config.pesel.sex === 'M') {
-                const nums = [1, 3, 5, 7, 9];
-                sex = this.getRandomTableItem(nums);
+                sex = this.getRandomTableItem(maleNums);
             }
             else {
-                const nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+                console.log(`No pesel sex value or wrong value: ${config.pesel.sex}. Generate my own`);
+                const nums = [...femaleNums, ...maleNums].sort();
                 sex = this.getRandomTableItem(nums);
             }
             return sex;
