@@ -23,21 +23,60 @@
 
     class Generator {
         calculateCheckSum() {
-            console.log('calculating');
+            throw new Error('Please implement me!');
         };
 
         validate() {
-            console.log('validating');
+            throw new Error('Please implement me!');
         };
+
+        generate() {
+            console.log('validating');
+        }
     }
 
-    // eslint-disable-next-line no-unused-vars
     class Regon extends Generator {
         constructor() {
             super();
             this.name = 'REGON';
-            this.exampleValues = [1, 2, 3];
+            // todo - this length
+            this.weights = [8, 9, 2, 3, 4, 5, 6, 7];
         }
+
+        generate() {
+            const generatedRegon = [];
+
+            for (let i = 0; i < 8; i++) {
+                generatedRegon.push(Util.getRandomInt(0, 9));
+            }
+            generatedRegon.push(this.calculateCheckSum(generatedRegon.join('')));
+            return generatedRegon.join('');
+        }
+
+
+        calculateCheckSum(regon) {
+            const numsSumTimesWeights = String(regon)
+                .split('')
+                .map((value, index) => Number(value) * this.weights[index])
+                .reduce((a, b) => a + b, 0);
+
+            const checkSum = (numsSumTimesWeights % 11);
+            return checkSum;
+        };
+
+        validate(regon) {
+            if (regon.length !== 9) {
+                console.error(`Wrong ${this.name} length: ${regon}`);
+                return `Wrong ${this.name} length`;
+            } else {
+                const numsSumTimesWeights = String(regon)
+                    .split('').slice(0, 8)
+                    .map((value, index) => Number(value) * this.weights[index])
+                    .reduce((a, b) => a + b, 0);
+                const checkSum = (numsSumTimesWeights % 11);
+                return Number(checkSum) === Number(regon.split('')[regon.length - 1]);
+            }
+        };
     }
 
     // eslint-disable-next-line no-unused-vars
@@ -239,21 +278,35 @@
             super();
             this.weights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
         }
-        generate() {
-            const generatedNip = [];
 
-            for (let i = 0; i < 9; i++) {
-                generatedNip.push(Util.getRandomInt(0, 9));
+        generate() {
+            let state = false;
+            let generatedNip = [];
+            let checkSum;
+
+            while (state === false) {
+                if (state === false) {
+                    for (let i = 0; i < 9; i++) {
+                        generatedNip.push(Util.getRandomInt(0, 9));
+                    }
+                    checkSum = this.calculateCheckSum(generatedNip.join(''));
+                    if (checkSum === 10) {
+                        console.log('10, re generation');
+                        generatedNip = [];
+                        state = false;
+                    } else {
+                        state = true;
+                    }
+                }
             }
 
-            generatedNip.push(
-                this.calculateCheckSum(generatedNip.join(''))
-            );
+            generatedNip.push(checkSum);
             return generatedNip.join('');
         }
 
         calculateCheckSum(nip) {
-            const numsSumTimesWeights = String(nip).split('')
+            const numsSumTimesWeights = String(nip)
+                .split('')
                 .map((value, index) => Number(value) * this.weights[index])
                 .reduce((a, b) => a + b, 0);
 
@@ -263,7 +316,7 @@
 
         validate(nip) {
             if (nip.length !== 10) {
-                console.error(`Wrong length of nip`);
+                console.error(`Wrong length of nip: ${nip}`);
                 return 'Wrong length';
             } else {
                 const numsSumTimesWeights = String(nip)
@@ -284,23 +337,28 @@
         console.log(`nip: ${nip1.generate()}`);
 
         regon = new Regon();
-        console.log(regon.getGenerated);
+        console.log(`regon: ${regon.generate()}`);
     }
+
     generate();
 
-
     function testAll() {
-        const pesel1 = new Pesel('1928', '07', '12');
-        const newPesel = pesel1.generate();
-        console.assert(pesel1.validate(newPesel) === true);
+        // const pesel1 = new Pesel('1928', '07', '12');
+        // console.assert(pesel1.validate(pesel1.generate()) === true);
 
-        const pesel2 = new Pesel('1928', '07', '12');
-        const newPesel2 = pesel2.generate();
-        console.assert(pesel2.validate(newPesel2) === true);
+        // const pesel2 = new Pesel('1928', '07', '12');
+        // console.assert(pesel2.validate(pesel2.generate()) === true);
 
         const nip1 = new Nip();
-        const newNip1 = nip1.generate();
-        console.assert(nip1.validate(newNip1) === true)
+        console.assert(nip1.validate(nip1.generate()) === true);
+
+        const nip2 = new Nip();
+        console.assert(nip2.validate(nip2.generate()) === true);
+
+        // const reg1 = new Regon();
+        // console.assert(reg1.validate(reg1.generate()) === true);
+
+        // console.log(nip2.calculateCheckSum(962950770));
     }
 
     testAll();
