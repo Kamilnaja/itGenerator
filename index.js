@@ -8,22 +8,27 @@
         },
     };
 
-    class Generator {
-        getRandomInt(min, max) {
+    class Util {
+        static getRandomInt(min, max) {
             const generatedNum = Math.floor(
                 Math.random() * (max - min + 1)
             ) + min;
             return generatedNum;
         }
 
-        getRandom() {
-            const rand = this.getRandomInt(0, this.exampleValues.length - 1);
-            return rand;
+        static getRandomTableItem(array) {
+            return array[Util.getRandomInt(0, array.length - 1)];
+        }
+    }
+
+    class Generator {
+        calculateCheckSum() {
+            console.log('calculating');
         };
 
-        get getGenerated() {
-            return `${this.name} : ${this.exampleValues[this.getRandom()]}`;
-        }
+        validate() {
+            console.log('validating');
+        };
     }
 
     class Regon extends Generator {
@@ -79,7 +84,7 @@
             generatedPesel.push(this.setDay(this.day));
 
             for (let i = 0; i < 3; i++) {
-                generatedPesel.push(this.getRandomInt(0, 9));
+                generatedPesel.push(Util.getRandomInt(0, 9));
             }
 
             generatedPesel.push(this.setSex());
@@ -177,11 +182,11 @@
                     `No pesel sex value or wrong value: ${config.pesel.sex}. Generate my own`
                 );
                 const nums = [...this.femaleNums, ...this.maleNums].sort();
-                sex = this.getRandomTableItem(nums);
+                sex = Util.getRandomTableItem(nums);
             } else if (config.pesel.sex === 'F') {
-                sex = this.getRandomTableItem(this.femaleNums);
+                sex = Util.getRandomTableItem(this.femaleNums);
             } else if (config.pesel.sex === 'M') {
-                sex = this.getRandomTableItem(this.maleNums);
+                sex = Util.getRandomTableItem(this.maleNums);
             }
             return sex;
         }
@@ -203,10 +208,10 @@
             console.log(randomYear);
             return randomYear;
         }
-
-        getRandomTableItem(nums) {
-            return nums[this.getRandomInt(0, nums.length - 1)];
-        }
+        // todo - move to utils
+        // getRandomTableItem(array) {
+        //     return array[Util.getRandomInt(0, nums.length - 1)];
+        // }
 
         calculateCheckSum(pesel) {
             const numsSumTimesWeights = String(pesel).split('')
@@ -216,7 +221,7 @@
             return checkSum;
         }
 
-        validatePesel(pesel) {
+        validate(pesel) {
             if (pesel.length !== 11) {
                 console.error('wrong length of pesel!');
                 return 'Wrong length';
@@ -240,7 +245,7 @@
             const generatedNip = [];
 
             for (let i = 0; i < 9; i++) {
-                generatedNip.push(this.getRandomInt(0, 9));
+                generatedNip.push(Util.getRandomInt(0, 9));
             }
 
             generatedNip.push(
@@ -281,11 +286,11 @@
     function testPesel() {
         const pesel1 = new Pesel('1928', '07', '12');
         const newPesel = pesel1.generate();
-        console.assert(pesel1.validatePesel(newPesel) === true);
+        console.assert(pesel1.validate(newPesel) === true);
 
         const pesel2 = new Pesel('1928', '07', '12');
         const newPesel2 = pesel2.generate();
-        console.assert(pesel2.validatePesel(newPesel2) === true);
+        console.assert(pesel2.validate(newPesel2) === true);
     }
 
     testPesel();
