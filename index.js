@@ -31,6 +31,7 @@
         };
     }
 
+    // eslint-disable-next-line no-unused-vars
     class Regon extends Generator {
         constructor() {
             super();
@@ -39,6 +40,7 @@
         }
     }
 
+    // eslint-disable-next-line no-unused-vars
     class Iban extends Generator {
         constructor() {
             super();
@@ -208,10 +210,6 @@
             console.log(randomYear);
             return randomYear;
         }
-        // todo - move to utils
-        // getRandomTableItem(array) {
-        //     return array[Util.getRandomInt(0, nums.length - 1)];
-        // }
 
         calculateCheckSum(pesel) {
             const numsSumTimesWeights = String(pesel).split('')
@@ -265,6 +263,20 @@
             const checkSum = (numsSumTimesWeights % 11);
             return checkSum;
         }
+
+        validate(nip) {
+            if (nip.length !== 10) {
+                console.error(`Wrong length of nip`);
+                return 'Wrong length';
+            } else {
+                const numsSumTimesWeights = String(nip)
+                    .split('').slice(0, 9)
+                    .map((value, index) => Number(value) * this.weights[index])
+                    .reduce((a, b) => a + b, 0);
+                const checkSum = (numsSumTimesWeights % 11);
+                return Number(checkSum) === Number(nip.split('')[nip.length - 1])
+            }
+        }
     }
 
     function generate() {
@@ -291,6 +303,12 @@
         const pesel2 = new Pesel('1928', '07', '12');
         const newPesel2 = pesel2.generate();
         console.assert(pesel2.validate(newPesel2) === true);
+
+        const nip1 = new Nip();
+        const newNip1 = nip1.generate();
+        console.log(`generated nip : ${nip1.generate()}`);
+
+        console.assert(nip1.validate(newNip1) === true)
     }
 
     testPesel();
