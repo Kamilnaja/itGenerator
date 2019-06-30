@@ -128,7 +128,7 @@
         }
 
         setMonth(givenMonth) {
-            console.log(`${givenMonth} gm`);
+            // console.log(`${givenMonth} gm`);
 
             let month;
             if (Number(givenMonth) > 12 || !givenMonth) {
@@ -160,7 +160,7 @@
         }
 
         generateRandomMonth() {
-            const rand = this.getRandomInt(1, 12);
+            const rand = Util.getRandomInt(1, 12);
             if (String(rand).length === 1) {
                 return `0${rand}`;
             } else {
@@ -169,7 +169,7 @@
         }
 
         generateRandomDay() {
-            const rand = this.getRandomInt(1, 31);
+            const rand = Util.getRandomInt(1, 31);
             if (String(rand).length === 1) {
                 return `0${rand}`;
             } else {
@@ -206,7 +206,7 @@
 
         // generate year from 1940 to 2019
         generateRandomYear() {
-            const randomYear = this.getRandomInt(1940, 2019);
+            const randomYear = Util.getRandomInt(1940, 2019);
             console.log(randomYear);
             return randomYear;
         }
@@ -253,12 +253,9 @@
         }
 
         calculateCheckSum(nip) {
-            console.log(`nip: ${nip}`);
-
             const numsSumTimesWeights = String(nip).split('')
                 .map((value, index) => Number(value) * this.weights[index])
                 .reduce((a, b) => a + b, 0);
-            console.log(`numsSumTimesWeights ${numsSumTimesWeights}`);
 
             const checkSum = (numsSumTimesWeights % 11);
             return checkSum;
@@ -286,16 +283,13 @@
         const nip1 = new Nip();
         console.log(`nip: ${nip1.generate()}`);
 
-        // iban = new Iban();
-        // console.log(iban.getGenerated);
-
-        // regon = new Regon();
-        // console.log(regon.getGenerated);
+        regon = new Regon();
+        console.log(regon.getGenerated);
     }
     generate();
 
 
-    function testPesel() {
+    function testAll() {
         const pesel1 = new Pesel('1928', '07', '12');
         const newPesel = pesel1.generate();
         console.assert(pesel1.validate(newPesel) === true);
@@ -306,10 +300,8 @@
 
         const nip1 = new Nip();
         const newNip1 = nip1.generate();
-        console.log(`generated nip : ${nip1.generate()}`);
-
         console.assert(nip1.validate(newNip1) === true)
     }
 
-    testPesel();
+    testAll();
 })();
