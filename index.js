@@ -231,13 +231,43 @@
         }
     };
 
-    class Nip {
+    class Nip extends Generator {
+        constructor() {
+            super();
+            this.weights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
+        }
+        generate() {
+            const generatedNip = [];
 
+            for (let i = 0; i < 9; i++) {
+                generatedNip.push(this.getRandomInt(0, 9));
+            }
+
+            generatedNip.push(
+                this.calculateCheckSum(generatedNip.join(''))
+            );
+            return generatedNip.join('');
+        }
+
+        calculateCheckSum(nip) {
+            console.log(`nip: ${nip}`);
+
+            const numsSumTimesWeights = String(nip).split('')
+                .map((value, index) => Number(value) * this.weights[index])
+                .reduce((a, b) => a + b, 0);
+            console.log(`numsSumTimesWeights ${numsSumTimesWeights}`);
+
+            const checkSum = (numsSumTimesWeights % 11);
+            return checkSum;
+        }
     }
 
     function generate() {
         const pesel = new Pesel('2018', '02', '02');
-        // console.log(`pesel: ${pesel.generate()}`);
+        console.log(`pesel: ${pesel.generate()}`);
+
+        const nip1 = new Nip();
+        console.log(`nip: ${nip1.generate()}`);
 
         // iban = new Iban();
         // console.log(iban.getGenerated);
@@ -251,12 +281,10 @@
     function testPesel() {
         const pesel1 = new Pesel('1928', '07', '12');
         const newPesel = pesel1.generate();
-        console.log(`new test pesel: ${newPesel}`);
         console.assert(pesel1.validatePesel(newPesel) === true);
 
         const pesel2 = new Pesel('1928', '07', '12');
         const newPesel2 = pesel2.generate();
-        console.log(`new test pesel: ${newPesel2}`);
         console.assert(pesel2.validatePesel(newPesel2) === true);
     }
 
