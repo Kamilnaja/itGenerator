@@ -1,9 +1,9 @@
 (() => {
     const config = {
         pesel: {
-            birthDay: '31', // ex 20, without leading 0
+            birthDay: '20', // ex 20, without leading 0
             birthMonth: '06', // ex 12, without leading 0
-            birthYear: '', // ex 1988
+            birthYear: '1988', // ex 1988
             sex: 'M', // M or F
         },
     };
@@ -128,8 +128,12 @@
         generate() {
             const generatedPesel = [];
             generatedPesel.push(this.setYear(this.year));
-            generatedPesel.push(this.setMonth(this.month));
-            generatedPesel.push(this.setDay(this.day));
+
+            const tempMonth = this.setMonth(this.month);
+            generatedPesel.push(tempMonth);
+
+            const tempDay = this.setDay(this.day, tempMonth);
+            generatedPesel.push(tempDay);
 
             for (let i = 0; i < 3; i++) {
                 generatedPesel.push(Util.getRandomInt(0, 9));
@@ -142,28 +146,30 @@
             return generatedPesel.join('');
         }
 
-        setDay(givenDay) {
+        setDay(givenDay, month) {
+            console.log('month setDay', month);
+
             let day;
             const birthDay = givenDay;
 
             if (!birthDay) {
                 console.warn('Missing value: config.pesel.birthDay');
                 console.log(`Generating random value for config.pesel.birthDay`);
-                day = this.generateRandomDay();
+                day = this.generateRandomDay(month);
             } else if (Number(birthDay) > 31) {
                 console.error(`Wrong day value ${birthDay}`);
-                day = this.generateRandomDay();
+                day = this.generateRandomDay(month);
             } else if (Number(birthDay) >= 30 && config.pesel.birthMonth === '2') {
                 console.warn(`Wrong days value for february!: ${birthDay}`);
                 console.log(`Generating random value for config.pesel.birthDay`);
-                day = this.generateRandomDay();
+                day = this.generateRandomDay(month);
             } else if (Number(birthDay) >= 31 && config.pesel.birthMonth === '4' ||
                 Number(birthDay) >= 31 && config.pesel.birthMonth === '6' ||
                 Number(birthDay) >= 31 && config.pesel.birthMonth === '9' ||
                 Number(birthDay) >= 31 && config.pesel.birthMonth === '11'
             ) {
                 console.warn(`Wrong days value for ${this.months[Number(config.pesel.birthMonth) - 1]}`);
-                day = this.generateRandomDay();
+                day = this.generateRandomDay(month);
                 console.log(`Generating random value for config.pesel.birthDay ${birthDay}`);
             } else if (config.pesel.birthDay.length === 1) {
                 day = `0${config.pesel.birthDay}`;
@@ -212,8 +218,27 @@
             }
         }
 
-        generateRandomDay() {
-            const rand = Util.getRandomInt(1, 31);
+        generateRandomDay(month) {
+            console.log(`GRD ${month}`);
+            let lastDayOfMonth = 31;
+
+            const thirtyOneDaysMonths = [1, 3, 5, 7, 8, 10, 12];
+            const thirtyDaysMonths = [4, 6, 9, 11];
+            console.log(`${Number(month)}`);
+
+            if (thirtyOneDaysMonths.some((item) => item === Number(month))) {
+                lastDayOfMonth = 31;
+            } else if (thirtyDaysMonths.some((item) => item === Number(month))) {
+                lastDayOfMonth = 30;
+                console.log('Thirty');
+            } else if (Number(month) === 2) {
+                console.log('Is february');
+                lastDayOfMonth = 29;
+            } else {
+                console.error(`Wrong month value!`);
+            }
+
+            const rand = Util.getRandomInt(1, lastDayOfMonth);
             if (String(rand).length === 1) {
                 return `0${rand}`;
             } else {
@@ -336,7 +361,7 @@
     }
 
     function generate() {
-        const pesel = new Pesel('2018', '02', '02');
+        const pesel = new Pesel(config.pesel.birthYear, config.pesel.birthMonth, config.pesel.birthDay);
         console.log(`pesel: ${pesel.generate()}`);
 
         const nip1 = new Nip();
@@ -349,20 +374,20 @@
     generate();
 
     function testAll() {
-        const pesel1 = new Pesel('1928', '07', '12');
-        console.assert(pesel1.validate(pesel1.generate()) === true, 'Pesel is not ok');
+        // const pesel1 = new Pesel('1928', '07', '');
+        // console.assert(pesel1.validate(pesel1.generate()) === true, 'Pesel is not ok');
 
-        const pesel2 = new Pesel('1928', '07', '12');
-        console.assert(pesel2.validate(pesel2.generate()) === true, 'Pesel is not ok');
+        // const pesel2 = new Pesel('1928', '07', '12');
+        // console.assert(pesel2.validate(pesel2.generate()) === true, 'Pesel is not ok');
 
-        const nip1 = new Nip();
-        console.assert(nip1.validate(nip1.generate()) === true, 'Nip is not ok');
+        // const nip1 = new Nip();
+        // console.assert(nip1.validate(nip1.generate()) === true, 'Nip is not ok');
 
-        const nip2 = new Nip();
-        console.assert(nip2.validate(nip2.generate()) === true, 'Nip is not ok');
+        // const nip2 = new Nip();
+        // console.assert(nip2.validate(nip2.generate()) === true, 'Nip is not ok');
 
-        const reg1 = new Regon();
-        console.assert(reg1.validate(reg1.generate()) === true, 'Regon is not ok');
+        // const reg1 = new Regon();
+        // console.assert(reg1.validate(reg1.generate()) === true, 'Regon is not ok');
     }
 
     testAll();
