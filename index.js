@@ -22,6 +22,11 @@
     }
 
     class Generator {
+        constructor() {
+            this.requiredLength = 0;
+            this.weights = [];
+        };
+
         calculateCheckSum() {
             throw new Error('Please implement me!');
         };
@@ -39,20 +44,21 @@
         constructor() {
             super();
             this.name = 'REGON';
-            // todo - this length
             this.weights = [8, 9, 2, 3, 4, 5, 6, 7];
+            this.requiredLength = 9;
         }
 
         generate() {
             const generatedRegon = [];
 
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < this.requiredLength - 1; i++) {
                 generatedRegon.push(Util.getRandomInt(0, 9));
             }
-            generatedRegon.push(this.calculateCheckSum(generatedRegon.join('')));
+
+            const checkSum = this.calculateCheckSum(generatedRegon.join(''));
+            generatedRegon.push(checkSum === 10 ? 0 : checkSum);
             return generatedRegon.join('');
         }
-
 
         calculateCheckSum(regon) {
             const numsSumTimesWeights = String(regon)
@@ -65,12 +71,12 @@
         };
 
         validate(regon) {
-            if (regon.length !== 9) {
+            if (regon.length !== this.requiredLength) {
                 console.error(`Wrong ${this.name} length: ${regon}`);
                 return `Wrong ${this.name} length`;
             } else {
                 const numsSumTimesWeights = String(regon)
-                    .split('').slice(0, 8)
+                    .split('').slice(0, this.requiredLength - 1)
                     .map((value, index) => Number(value) * this.weights[index])
                     .reduce((a, b) => a + b, 0);
                 const checkSum = (numsSumTimesWeights % 11);
@@ -96,6 +102,7 @@
         constructor(year, month, day) {
             super();
             this.name = 'PESEL';
+            this.requiredLength = 11;
             this.weights = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
             this.femaleNums = [0, 2, 4, 6, 8];
             this.maleNums = [1, 3, 5, 7, 9];
@@ -167,8 +174,6 @@
         }
 
         setMonth(givenMonth) {
-            // console.log(`${givenMonth} gm`);
-
             let month;
             if (Number(givenMonth) > 12 || !givenMonth) {
                 console.log(`Wrong month value : ${config.pesel.birthMonth}`);
@@ -259,12 +264,12 @@
         }
 
         validate(pesel) {
-            if (pesel.length !== 11) {
+            if (pesel.length !== this.requiredLength) {
                 console.error('wrong length of pesel!');
                 return 'Wrong length';
             } else {
                 const numsSumTimesWeights = String(pesel)
-                    .split('').slice(0, 10)
+                    .split('').slice(0, this.requiredLength - 1)
                     .map((value, index) => Number(value) * this.weights[index])
                     .reduce((a, b) => a + b, 0);
                 const checkSum = (10 - (numsSumTimesWeights % 10)) % 10;
@@ -277,6 +282,7 @@
         constructor() {
             super();
             this.weights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
+            this.requiredLength = 10;
         }
 
         generate() {
@@ -286,7 +292,7 @@
 
             while (state === false) {
                 if (state === false) {
-                    for (let i = 0; i < 9; i++) {
+                    for (let i = 0; i < this.requiredLength - 1; i++) {
                         generatedNip.push(Util.getRandomInt(0, 9));
                     }
                     checkSum = this.calculateCheckSum(generatedNip.join(''));
@@ -315,12 +321,12 @@
         }
 
         validate(nip) {
-            if (nip.length !== 10) {
+            if (nip.length !== this.requiredLength) {
                 console.error(`Wrong length of nip: ${nip}`);
                 return 'Wrong length';
             } else {
                 const numsSumTimesWeights = String(nip)
-                    .split('').slice(0, 9)
+                    .split('').slice(0, this.requiredLength - 1)
                     .map((value, index) => Number(value) * this.weights[index])
                     .reduce((a, b) => a + b, 0);
                 const checkSum = (numsSumTimesWeights % 11);
@@ -343,22 +349,20 @@
     generate();
 
     function testAll() {
-        // const pesel1 = new Pesel('1928', '07', '12');
-        // console.assert(pesel1.validate(pesel1.generate()) === true);
+        const pesel1 = new Pesel('1928', '07', '12');
+        console.assert(pesel1.validate(pesel1.generate()) === true, 'Pesel is not ok');
 
-        // const pesel2 = new Pesel('1928', '07', '12');
-        // console.assert(pesel2.validate(pesel2.generate()) === true);
+        const pesel2 = new Pesel('1928', '07', '12');
+        console.assert(pesel2.validate(pesel2.generate()) === true, 'Pesel is not ok');
 
         const nip1 = new Nip();
-        console.assert(nip1.validate(nip1.generate()) === true);
+        console.assert(nip1.validate(nip1.generate()) === true, 'Nip is not ok');
 
         const nip2 = new Nip();
-        console.assert(nip2.validate(nip2.generate()) === true);
+        console.assert(nip2.validate(nip2.generate()) === true, 'Nip is not ok');
 
-        // const reg1 = new Regon();
-        // console.assert(reg1.validate(reg1.generate()) === true);
-
-        // console.log(nip2.calculateCheckSum(962950770));
+        const reg1 = new Regon();
+        console.assert(reg1.validate(reg1.generate()) === true, 'Regon is not ok');
     }
 
     testAll();
