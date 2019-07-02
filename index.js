@@ -3,7 +3,7 @@
         pesel: {
             birthDay: '20', // ex 20, without leading 0
             birthMonth: '06', // ex 12, without leading 0
-            birthYear: '1987', // ex 1988
+            birthYear: '1988', // ex 1988
             sex: 'M', // M or F
         },
     };
@@ -345,7 +345,7 @@
 
     function testAll() {
         const peselErr = 'Pesel is not ok ';
-        const nipErr = 'Pesel is not ok ';
+        const nipErr = 'Nip is not ok ';
         const regonErr = 'Regon is not ok ';
 
         const pesel1 = new Pesel('1928', '07', '11');
@@ -366,7 +366,7 @@
 
         const reg1 = new Regon();
         const regon = reg1.generate();
-        console.assert(reg1.validate(regon) === true, regonErr + regonErr + regon);
+        console.assert(reg1.validate(regon) === true, regonErr + regon);
     }
 
     testAll();
