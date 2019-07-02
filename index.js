@@ -3,7 +3,7 @@
         pesel: {
             birthDay: '20', // ex 20, without leading 0
             birthMonth: '06', // ex 12, without leading 0
-            birthYear: '1988', // ex 1988
+            birthYear: '1987', // ex 1988
             sex: 'M', // M or F
         },
     };
@@ -29,7 +29,7 @@
 
         calculateNumsSumTimesWeights(value, trim) {
             let sliceEnd;
-            trim ? sliceEnd = value.length - 1: sliceEnd = value.length;
+            trim ? sliceEnd = value.length - 1 : sliceEnd = value.length;
             return String(value)
                 .split('')
                 .slice(0, sliceEnd)
@@ -65,8 +65,7 @@
                 generatedRegon.push(Util.getRandomInt(0, 9));
             }
 
-            const checkSum = this.calculateCheckSum(generatedRegon.join(''));
-            generatedRegon.push(checkSum === 10 ? 0 : checkSum);
+            generatedRegon.push(this.calculateCheckSum(generatedRegon.join('')) % 10);
             return generatedRegon.join('');
         }
 
@@ -137,7 +136,7 @@
 
             generatedPesel.push(this.setSex());
             generatedPesel.push(
-                this.calculateCheckSum(generatedPesel.join(''))
+                this.calculateCheckSum(generatedPesel.join('')) % 10
             );
             return generatedPesel.join('');
         }
@@ -265,9 +264,7 @@
 
         // generate year from 1940 to 2019
         generateRandomYear() {
-            const randomYear = Util.getRandomInt(1940, 2019);
-            console.log(randomYear);
-            return randomYear;
+            return randomYear = Util.getRandomInt(1940, 2019);
         }
 
         calculateCheckSum(pesel) {
@@ -344,23 +341,32 @@
         console.log(`regon: ${regon.generate()}`);
     }
 
-    generate();
+    // generate();
 
     function testAll() {
+        const peselErr = 'Pesel is not ok ';
+        const nipErr = 'Pesel is not ok ';
+        const regonErr = 'Regon is not ok ';
+
         const pesel1 = new Pesel('1928', '07', '11');
-        console.assert(pesel1.validate(pesel1.generate()) === true, 'Pesel is not ok');
+        const pesel1Value = pesel1.generate();
+        console.assert(pesel1.validate(pesel1Value) === true, peselErr + pesel1Value);
 
         const pesel2 = new Pesel('1928', '07', '12');
-        console.assert(pesel2.validate(pesel2.generate()) === true, 'Pesel is not ok');
+        const pesel2Value = pesel2.generate();
+        console.assert(pesel2.validate(pesel2Value) === true, peselErr + pesel1Value);
 
         const nip1 = new Nip();
-        console.assert(nip1.validate(nip1.generate()) === true, 'Nip is not ok');
+        const nip1Value = nip1.generate();
+        console.assert(nip1.validate(nip1Value) === true, nipErr + nip1Value);
 
         const nip2 = new Nip();
-        console.assert(nip2.validate(nip2.generate()) === true, 'Nip is not ok');
+        const nip2Value = nip2.generate();
+        console.assert(nip2.validate(nip2Value) === true, nipErr + nip2Value);
 
         const reg1 = new Regon();
-        console.assert(reg1.validate(reg1.generate()) === true, 'Regon is not ok');
+        const regon = reg1.generate();
+        console.assert(reg1.validate(regon) === true, regonErr + regonErr + regon);
     }
 
     testAll();
