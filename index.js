@@ -33,7 +33,7 @@
             return String(value)
                 .split(',')
                 .slice(0, sliceEnd)
-                .map((val, index) => value ? Number(val) * this.weights[index] : 0)
+                .map((val, index) => Number(val) * this.weights[index])
                 .reduce((a, b) => a + b, 0);
         };
 
@@ -65,13 +65,8 @@
                 generatedIDNumber[i] = Util.getRandomInt(0, 9);
             }
 
-            console.log(`id: ${generatedIDNumber}`);
-
             const checkSum = this.calculateCheckSum(generatedIDNumber);
             generatedIDNumber.splice(3, 0, checkSum);
-
-            console.log(`Generated: ${generatedIDNumber} : checksum ${checkSum}`);
-
             return generatedIDNumber.join('');
         }
 
@@ -226,7 +221,7 @@
             } else if (config.pesel.birthDay.length === 1) {
                 day = `0${config.pesel.birthDay} `;
             } else if (config.pesel.birthDay.length === 2) {
-                day = `${config.pesel.birthDay} `;
+                day = `${config.pesel.birthDay}`;
             }
             return day;
         }
@@ -402,11 +397,11 @@
         console.log(`regon: ${regon.generate()} `);
 
         const id = new IDNumber();
-        console.log(`id: ${id.generate()}`);
+        console.log(`idNumber: ${id.generate()}`);
 
     }
 
-    // generate();
+    generate();
 
     function testAll() {
         const peselErr = 'Pesel is not ok ';
@@ -437,7 +432,6 @@
         const idNumber1 = new IDNumber();
         const idNumberValue = idNumber1.generate();
 
-        console.log(`GENERATED ID NUMBER: ${idNumberValue} `);
         console.assert(idNumber1.validate(idNumberValue) === true, IDNumberErr + idNumberValue);
     }
 
