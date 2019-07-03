@@ -61,19 +61,22 @@
                 generatedIDNumber.push(String.fromCharCode(Util.getRandomInt(65, 90)));
             }
 
-            for (let i = 3; i < this.requiredLength; i++) {
+            for (let i = 3; i < this.requiredLength - 1; i++) {
                 generatedIDNumber[i] = Util.getRandomInt(0, 9);
             }
 
+            console.log(`id: ${generatedIDNumber}`);
+
             const checkSum = this.calculateCheckSum(generatedIDNumber);
-            generatedIDNumber[3] = checkSum;
+            generatedIDNumber.splice(3, 0, checkSum);
+
             console.log(`Generated: ${generatedIDNumber} : checksum ${checkSum}`);
 
             return generatedIDNumber.join('');
         }
 
         calculateCheckSum(idNumber) {
-            return this.calculateNumsSumTimesWeights((this.parseIDNumberToValues(idNumber)), true) % 10;
+            return this.calculateNumsSumTimesWeights((this.parseIDNumberToValues(idNumber)), false) % 10;
         };
 
         parseIDNumberToValues(idNumber) {
@@ -102,10 +105,7 @@
                 const checkSum = (
                     this.calculateNumsSumTimesWeights(this.parseIDNumberToValues(arrToEvaluate)) % 10
                 );
-
-                console.log(`wyliczona: ${checkSum}, dostępna: ${(idNumber)[3]}`);
-
-                return Number(checkSum) === Number(this.parseIDNumberToValues(idNumber)[3]);
+                return Number(checkSum) === Number(idNumber[3]);
             }
         }
     }
@@ -409,38 +409,36 @@
     // generate();
 
     function testAll() {
-        // const peselErr = 'Pesel is not ok ';
-        // const nipErr = 'Nip is not ok ';
-        // const regonErr = 'Regon is not ok ';
+        const peselErr = 'Pesel is not ok ';
+        const nipErr = 'Nip is not ok ';
+        const regonErr = 'Regon is not ok ';
         const IDNumberErr = 'IDNumber is not ok ';
 
-        // const pesel1 = new Pesel('1928', '07', '11');
-        // const pesel1Value = pesel1.generate();
-        // console.assert(pesel1.validate(pesel1Value) === true, peselErr + pesel1Value);
+        const pesel1 = new Pesel('1928', '07', '11');
+        const pesel1Value = pesel1.generate();
+        console.assert(pesel1.validate(pesel1Value) === true, peselErr + pesel1Value);
 
-        // const pesel2 = new Pesel('1928', '07', '12');
-        // const pesel2Value = pesel2.generate();
-        // console.assert(pesel2.validate(pesel2Value) === true, peselErr + pesel1Value);
+        const pesel2 = new Pesel('1928', '07', '12');
+        const pesel2Value = pesel2.generate();
+        console.assert(pesel2.validate(pesel2Value) === true, peselErr + pesel1Value);
 
-        // const nip1 = new Nip();
-        // const nip1Value = nip1.generate();
-        // console.assert(nip1.validate(nip1Value) === true, nipErr + nip1Value);
+        const nip1 = new Nip();
+        const nip1Value = nip1.generate();
+        console.assert(nip1.validate(nip1Value) === true, nipErr + nip1Value);
 
-        // const nip2 = new Nip();
-        // const nip2Value = nip2.generate();
-        // console.assert(nip2.validate(nip2Value) === true, nipErr + nip2Value);
+        const nip2 = new Nip();
+        const nip2Value = nip2.generate();
+        console.assert(nip2.validate(nip2Value) === true, nipErr + nip2Value);
 
-        // const reg1 = new Regon();
-        // const regonValue = reg1.generate();
-        // console.assert(reg1.validate(regonValue) === true, regonErr + regonValue);
+        const reg1 = new Regon();
+        const regonValue = reg1.generate();
+        console.assert(reg1.validate(regonValue) === true, regonErr + regonValue);
 
         const idNumber1 = new IDNumber();
         const idNumberValue = idNumber1.generate();
+
         console.log(`GENERATED ID NUMBER: ${idNumberValue} `);
-
         console.assert(idNumber1.validate(idNumberValue) === true, IDNumberErr + idNumberValue);
-
-        console.log(idNumber1.validate('ABS123456'));
     }
 
     testAll();
