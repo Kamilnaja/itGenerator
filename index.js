@@ -31,9 +31,9 @@
             let sliceEnd;
             trim ? sliceEnd = value.length - 1 : sliceEnd = value.length;
             return String(value)
-                .split('')
+                .split(',')
                 .slice(0, sliceEnd)
-                .map((val, index) => Number(val) * this.weights[index])
+                .map((val, index) => value ? Number(val) * this.weights[index] : 0)
                 .reduce((a, b) => a + b, 0);
         };
 
@@ -42,12 +42,72 @@
         };
 
         generate() {
-            console.log('validating');
+            throw new Error(`Please implement me!`);
         }
     }
 
     class IDNumber extends Generator {
+        constructor() {
+            super();
+            this.name = 'IDNumber';
+            this.weights = [7, 3, 1, 7, 3, 1, 7, 3];
+            this.requiredLength = 9;
+        }
 
+        generate() {
+            const generatedIDNumber = [];
+
+            for (let i = 0; i < 3; i++) {
+                generatedIDNumber.push(String.fromCharCode(Util.getRandomInt(65, 90)));
+            }
+
+            for (let i = 3; i < this.requiredLength; i++) {
+                generatedIDNumber[i] = Util.getRandomInt(0, 9);
+            }
+
+            const checkSum = this.calculateCheckSum(generatedIDNumber);
+            generatedIDNumber[3] = checkSum;
+            console.log(`Generated: ${generatedIDNumber} : checksum ${checkSum}`);
+
+            return generatedIDNumber.join('');
+        }
+
+        calculateCheckSum(idNumber) {
+            return this.calculateNumsSumTimesWeights((this.parseIDNumberToValues(idNumber)), true) % 10;
+        };
+
+        parseIDNumberToValues(idNumber) {
+            // todo - remove duplicates
+            if (typeof idNumber === 'object') {
+                return idNumber.map((item) => isNaN(item) ? item.charCodeAt() - 55 : item);
+            } else if (typeof idNumber === 'string') {
+                return idNumber.split(',').map((item) => isNaN(item) ? item.charCodeAt() - 55 : item);
+            }
+        }
+
+        validate(idNumber) {
+            if (idNumber.length !== this.requiredLength) {
+                console.error(`Wrong ${this.name} length: ${idNumber} `);
+                return `Wrong ${this.name} length`;
+            } else {
+                const arrToEvaluate = [];
+                for (let i = 0; i < 3; i++) {
+                    arrToEvaluate.push(idNumber[i]);
+                }
+
+                for (let i = 4; i < this.requiredLength; i++) {
+                    arrToEvaluate.push(idNumber[i]);
+                }
+
+                const checkSum = (
+                    this.calculateNumsSumTimesWeights(this.parseIDNumberToValues(arrToEvaluate)) % 10
+                );
+
+                console.log(`wyliczona: ${checkSum}, dostępna: ${(idNumber)[3]}`);
+
+                return Number(checkSum) === Number(this.parseIDNumberToValues(idNumber)[3]);
+            }
+        }
     }
 
     class Regon extends Generator {
@@ -70,21 +130,20 @@
         }
 
         calculateCheckSum(regon) {
-            return this.calculateNumsSumTimesWeights(regon, false) % 11;
+            return this.calculateNumsSumTimesWeights(regon.split(''), false) % 11;
         };
 
         validate(regon) {
             if (regon.length !== this.requiredLength) {
-                console.error(`Wrong ${this.name} length: ${regon}`);
+                console.error(`Wrong ${this.name} length: ${regon} `);
                 return `Wrong ${this.name} length`;
             } else {
-                const checkSum = (this.calculateNumsSumTimesWeights(regon, true) % 11);
+                const checkSum = (this.calculateNumsSumTimesWeights(regon.split(''), true) % 11);
                 return Number(checkSum) === Number(regon.split('')[regon.length - 1]);
             }
         };
     }
 
-    // eslint-disable-next-line no-unused-vars
     class Iban extends Generator {
         constructor() {
             super();
@@ -150,10 +209,10 @@
                 console.log(`Generating random value for config.pesel.birthDay`);
                 day = this.generateRandomDay(month);
             } else if (Number(birthDay) > 31) {
-                console.error(`Wrong day value ${birthDay}`);
+                console.error(`Wrong day value ${birthDay} `);
                 day = this.generateRandomDay(month);
             } else if (Number(birthDay) >= 30 && config.pesel.birthMonth === '2') {
-                console.warn(`Wrong days value for february!: ${birthDay}`);
+                console.warn(`Wrong days value for february!: ${birthDay} `);
                 console.log(`Generating random value for config.pesel.birthDay`);
                 day = this.generateRandomDay(month);
             } else if (Number(birthDay) >= 31 && config.pesel.birthMonth === '4' ||
@@ -165,9 +224,9 @@
                 day = this.generateRandomDay(month);
                 console.log(`Generating random value for config.pesel.birthDay ${birthDay}`);
             } else if (config.pesel.birthDay.length === 1) {
-                day = `0${config.pesel.birthDay}`;
+                day = `0${config.pesel.birthDay} `;
             } else if (config.pesel.birthDay.length === 2) {
-                day = `${config.pesel.birthDay}`;
+                day = `${config.pesel.birthDay} `;
             }
             return day;
         }
@@ -175,7 +234,7 @@
         setMonth(givenMonth) {
             let month;
             if (Number(givenMonth) > 12 || !givenMonth) {
-                console.log(`Wrong month value : ${config.pesel.birthMonth}`);
+                console.log(`Wrong month value: ${config.pesel.birthMonth} `);
                 month = this.generateRandomMonth();
             } else if (config.pesel.birthMonth <= 12) {
                 month = this.calculatePeselMonth(givenMonth);
@@ -205,7 +264,7 @@
         generateRandomMonth() {
             const rand = Util.getRandomInt(1, 12);
             if (String(rand).length === 1) {
-                return `0${rand}`;
+                return `0${rand} `;
             } else {
                 return String(rand);
             }
@@ -229,7 +288,7 @@
 
             const rand = Util.getRandomInt(1, lastDayOfMonth);
             if (String(rand).length === 1) {
-                return `0${rand}`;
+                return `0${rand} `;
             } else {
                 return String(rand);
             }
@@ -239,7 +298,7 @@
             let sex;
             if (!config.pesel.sex) {
                 console.log(
-                    `No pesel sex value or wrong value: ${config.pesel.sex}. Generate my own`
+                    `No pesel sex value or wrong value: ${config.pesel.sex}.Generate my own`
                 );
                 const nums = [...this.femaleNums, ...this.maleNums].sort();
                 sex = Util.getRandomTableItem(nums);
@@ -254,7 +313,7 @@
         setYear(givenYear) {
             let year;
             if (!givenYear) {
-                console.log(`No year value. Generate my own`);
+                console.log(`No year value.Generate my own`);
                 year = String(this.generateRandomYear()).slice(2, 4);
             } else if (String(givenYear).length === 4) {
                 year = String(givenYear).slice(2, 4);
@@ -268,7 +327,7 @@
         }
 
         calculateCheckSum(pesel) {
-            return 10 - (this.calculateNumsSumTimesWeights(pesel, false) % 10) % 10;
+            return 10 - (this.calculateNumsSumTimesWeights(pesel.split(''), false) % 10) % 10;
         }
 
         validate(pesel) {
@@ -276,7 +335,7 @@
                 console.error('wrong length of pesel!');
                 return 'Wrong length';
             } else {
-                const checkSum = (10 - (this.calculateNumsSumTimesWeights(pesel, true) % 10)) % 10;
+                const checkSum = (10 - (this.calculateNumsSumTimesWeights(pesel.split(''), true) % 10)) % 10;
                 return Number(checkSum) === Number(pesel.split('')[pesel.length - 1]);
             }
         }
@@ -315,16 +374,18 @@
         }
 
         calculateCheckSum(nip) {
-            const checkSum = (this.calculateNumsSumTimesWeights(nip) % 11);
+            const checkSum = (this.calculateNumsSumTimesWeights(nip.split('')) % 11);
             return checkSum;
         }
 
         validate(nip) {
+            console.log(`NIP: ${nip} `);
+
             if (nip.length !== this.requiredLength) {
-                console.error(`Wrong length of nip: ${nip}`);
+                console.error(`Wrong length of nip: ${nip} `);
                 return 'Wrong length';
             } else {
-                const checkSum = (this.calculateNumsSumTimesWeights(nip, true) % 11);
+                const checkSum = (this.calculateNumsSumTimesWeights(nip.split(''), true) % 11);
                 return Number(checkSum) === Number(nip.split('')[nip.length - 1]);
             }
         }
@@ -332,41 +393,54 @@
 
     function generate() {
         const pesel = new Pesel(config.pesel.birthYear, config.pesel.birthMonth, config.pesel.birthDay);
-        console.log(`pesel: ${pesel.generate()}`);
+        console.log(`pesel: ${pesel.generate()} `);
 
         const nip1 = new Nip();
-        console.log(`nip: ${nip1.generate()}`);
+        console.log(`nip: ${nip1.generate()} `);
 
-        regon = new Regon();
-        console.log(`regon: ${regon.generate()}`);
+        const regon = new Regon();
+        console.log(`regon: ${regon.generate()} `);
+
+        const id = new IDNumber();
+        console.log(`id: ${id.generate()}`);
+
     }
 
     // generate();
 
     function testAll() {
-        const peselErr = 'Pesel is not ok ';
-        const nipErr = 'Nip is not ok ';
-        const regonErr = 'Regon is not ok ';
+        // const peselErr = 'Pesel is not ok ';
+        // const nipErr = 'Nip is not ok ';
+        // const regonErr = 'Regon is not ok ';
+        const IDNumberErr = 'IDNumber is not ok ';
 
-        const pesel1 = new Pesel('1928', '07', '11');
-        const pesel1Value = pesel1.generate();
-        console.assert(pesel1.validate(pesel1Value) === true, peselErr + pesel1Value);
+        // const pesel1 = new Pesel('1928', '07', '11');
+        // const pesel1Value = pesel1.generate();
+        // console.assert(pesel1.validate(pesel1Value) === true, peselErr + pesel1Value);
 
-        const pesel2 = new Pesel('1928', '07', '12');
-        const pesel2Value = pesel2.generate();
-        console.assert(pesel2.validate(pesel2Value) === true, peselErr + pesel1Value);
+        // const pesel2 = new Pesel('1928', '07', '12');
+        // const pesel2Value = pesel2.generate();
+        // console.assert(pesel2.validate(pesel2Value) === true, peselErr + pesel1Value);
 
-        const nip1 = new Nip();
-        const nip1Value = nip1.generate();
-        console.assert(nip1.validate(nip1Value) === true, nipErr + nip1Value);
+        // const nip1 = new Nip();
+        // const nip1Value = nip1.generate();
+        // console.assert(nip1.validate(nip1Value) === true, nipErr + nip1Value);
 
-        const nip2 = new Nip();
-        const nip2Value = nip2.generate();
-        console.assert(nip2.validate(nip2Value) === true, nipErr + nip2Value);
+        // const nip2 = new Nip();
+        // const nip2Value = nip2.generate();
+        // console.assert(nip2.validate(nip2Value) === true, nipErr + nip2Value);
 
-        const reg1 = new Regon();
-        const regon = reg1.generate();
-        console.assert(reg1.validate(regon) === true, regonErr + regon);
+        // const reg1 = new Regon();
+        // const regonValue = reg1.generate();
+        // console.assert(reg1.validate(regonValue) === true, regonErr + regonValue);
+
+        const idNumber1 = new IDNumber();
+        const idNumberValue = idNumber1.generate();
+        console.log(`GENERATED ID NUMBER: ${idNumberValue} `);
+
+        console.assert(idNumber1.validate(idNumberValue) === true, IDNumberErr + idNumberValue);
+
+        console.log(idNumber1.validate('ABS123456'));
     }
 
     testAll();
