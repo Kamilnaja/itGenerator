@@ -38,7 +38,7 @@
             let sliceEnd;
             trim ? sliceEnd = value.length - 1 : sliceEnd = value.length;
             return String(
-                this.preparedInput(value)            )
+                this.preparedInput(value))
                 .split(',')
                 .slice(0, sliceEnd)
                 .map((val, index) => Number(val) * this.weights[index])
@@ -140,11 +140,13 @@
         };
 
         validate(regon) {
+            console.log(regon);
+
             if (regon.length !== this.requiredLength) {
                 console.error(`Wrong ${this.name} length: ${regon} `);
                 return `Wrong ${this.name} length`;
             } else {
-                const checkSum = (this.calculateNumsSumTimesWeights(regon, true) % 11);
+                const checkSum = (this.calculateNumsSumTimesWeights(regon, true) % 11) % 10;
                 return Number(checkSum) === Number(regon.split('')[regon.length - 1]);
             }
         };
@@ -416,7 +418,6 @@
 
         const id = new IDNumber();
         console.log(`idNumber: ${id.generate()}`);
-
     }
 
     generate();
@@ -443,14 +444,15 @@
         const nip2Value = nip2.generate();
         console.assert(nip2.validate(nip2Value) === true, nipErr + nip2Value);
 
-        const reg1 = new Regon();
-        const regonValue = reg1.generate();
-        console.assert(reg1.validate(regonValue) === true, regonErr + regonValue);
-
         const idNumber1 = new IDNumber();
         const idNumberValue = idNumber1.generate();
 
         console.assert(idNumber1.validate(idNumberValue) === true, IDNumberErr + idNumberValue);
+
+        const reg1 = new Regon();
+        const regonValue = reg1.generate();
+        console.assert(reg1.validate(regonValue) === true, regonErr + regonValue);
+
     }
 
     testAll();
