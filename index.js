@@ -10,10 +10,7 @@
 
     class Util {
         static getRandomInt(min, max) {
-            const generatedNum = Math.floor(
-                Math.random() * (max - min + 1)
-            ) + min;
-            return generatedNum;
+            return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
         static getRandomTableItem(array) {
@@ -27,10 +24,21 @@
             this.weights = [];
         };
 
+        preparedInput(value) {
+            if (typeof value === 'string') {
+                value = value.split('');
+            } else if (typeof value === 'object') {
+                value = value.join(',');
+            }
+            return value;
+        }
+
         calculateNumsSumTimesWeights(value, trim) {
+            this.preparedInput(value);
             let sliceEnd;
             trim ? sliceEnd = value.length - 1 : sliceEnd = value.length;
-            return String(value)
+            return String(
+                this.preparedInput(value)            )
                 .split(',')
                 .slice(0, sliceEnd)
                 .map((val, index) => Number(val) * this.weights[index])
@@ -75,12 +83,15 @@
         };
 
         parseIDNumberToValues(idNumber) {
-            // todo - remove duplicates
             if (typeof idNumber === 'object') {
-                return idNumber.map((item) => isNaN(item) ? item.charCodeAt() - 55 : item);
+                return idNumber.map(this.mapToNumbers());
             } else if (typeof idNumber === 'string') {
-                return idNumber.split(',').map((item) => isNaN(item) ? item.charCodeAt() - 55 : item);
+                return idNumber.split(',').map(this.mapToNumbers());
             }
+        }
+
+        mapToNumbers() {
+            return (item) => isNaN(item) ? item.charCodeAt() - 55 : item;
         }
 
         validate(idNumber) {
@@ -120,12 +131,12 @@
                 generatedRegon.push(Util.getRandomInt(0, 9));
             }
 
-            generatedRegon.push(this.calculateCheckSum(generatedRegon.join('')) % 10);
+            generatedRegon.push(this.calculateCheckSum(generatedRegon) % 10);
             return generatedRegon.join('');
         }
 
         calculateCheckSum(regon) {
-            return this.calculateNumsSumTimesWeights(regon.split(''), false) % 11;
+            return this.calculateNumsSumTimesWeights(regon, false) % 11;
         };
 
         validate(regon) {
@@ -133,12 +144,13 @@
                 console.error(`Wrong ${this.name} length: ${regon} `);
                 return `Wrong ${this.name} length`;
             } else {
-                const checkSum = (this.calculateNumsSumTimesWeights(regon.split(''), true) % 11);
+                const checkSum = (this.calculateNumsSumTimesWeights(regon, true) % 11);
                 return Number(checkSum) === Number(regon.split('')[regon.length - 1]);
             }
         };
     }
 
+    // eslint-disable-next-line no-unused-vars
     class Iban extends Generator {
         constructor() {
             super();
@@ -190,7 +202,7 @@
 
             generatedPesel.push(this.setSex());
             generatedPesel.push(
-                this.calculateCheckSum(generatedPesel.join('')) % 10
+                this.calculateCheckSum(generatedPesel) % 10
             );
             return generatedPesel.join('');
         }
@@ -322,7 +334,10 @@
         }
 
         calculateCheckSum(pesel) {
-            return 10 - (this.calculateNumsSumTimesWeights(pesel.split(''), false) % 10) % 10;
+            if (typeof pesel === 'object') {
+                pesel = pesel.join('');
+            }
+            return 10 - (this.calculateNumsSumTimesWeights(pesel, false) % 10) % 10;
         }
 
         validate(pesel) {
@@ -330,7 +345,7 @@
                 console.error('wrong length of pesel!');
                 return 'Wrong length';
             } else {
-                const checkSum = (10 - (this.calculateNumsSumTimesWeights(pesel.split(''), true) % 10)) % 10;
+                const checkSum = (10 - (this.calculateNumsSumTimesWeights(pesel, true) % 10)) % 10;
                 return Number(checkSum) === Number(pesel.split('')[pesel.length - 1]);
             }
         }
@@ -353,7 +368,7 @@
                     for (let i = 0; i < this.requiredLength - 1; i++) {
                         generatedNip.push(Util.getRandomInt(0, 9));
                     }
-                    checkSum = this.calculateCheckSum(generatedNip.join(''));
+                    checkSum = this.calculateCheckSum(generatedNip);
                     if (checkSum === 10) {
                         console.log('10, re generation');
                         generatedNip = [];
@@ -369,7 +384,10 @@
         }
 
         calculateCheckSum(nip) {
-            const checkSum = (this.calculateNumsSumTimesWeights(nip.split('')) % 11);
+            if (typeof nip === 'object') {
+                nip = nip.join('');
+            }
+            const checkSum = (this.calculateNumsSumTimesWeights(nip) % 11);
             return checkSum;
         }
 
@@ -380,7 +398,7 @@
                 console.error(`Wrong length of nip: ${nip} `);
                 return 'Wrong length';
             } else {
-                const checkSum = (this.calculateNumsSumTimesWeights(nip.split(''), true) % 11);
+                const checkSum = (this.calculateNumsSumTimesWeights(nip, true) % 11);
                 return Number(checkSum) === Number(nip.split('')[nip.length - 1]);
             }
         }
