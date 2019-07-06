@@ -16,6 +16,10 @@
         static getRandomTableItem(array) {
             return array[Util.getRandomInt(0, array.length - 1)];
         }
+
+        static getErrorInfo(type) {
+            return `${type} is not ok `;
+        }
     }
 
     class Generator {
@@ -372,7 +376,6 @@
                     }
                     checkSum = this.calculateCheckSum(generatedNip);
                     if (checkSum === 10) {
-                        console.log('10, re generation');
                         generatedNip = [];
                         state = false;
                     } else {
@@ -423,36 +426,30 @@
     generate();
 
     function testAll() {
-        const peselErr = 'Pesel is not ok ';
-        const nipErr = 'Nip is not ok ';
-        const regonErr = 'Regon is not ok ';
-        const IDNumberErr = 'IDNumber is not ok ';
-
         const pesel1 = new Pesel('1928', '07', '11');
         const pesel1Value = pesel1.generate();
-        console.assert(pesel1.validate(pesel1Value) === true, peselErr + pesel1Value);
+        console.assert(pesel1.validate(pesel1Value) === true, Util.getErrorInfo('pesel') + pesel1Value);
 
         const pesel2 = new Pesel('1928', '07', '12');
         const pesel2Value = pesel2.generate();
-        console.assert(pesel2.validate(pesel2Value) === true, peselErr + pesel1Value);
+        console.assert(pesel2.validate(pesel2Value) === true, Util.getErrorInfo('pesel') + pesel1Value);
 
         const nip1 = new Nip();
         const nip1Value = nip1.generate();
-        console.assert(nip1.validate(nip1Value) === true, nipErr + nip1Value);
+        console.assert(nip1.validate(nip1Value) === true, Util.getErrorInfo('nip') + nip1Value);
 
         const nip2 = new Nip();
         const nip2Value = nip2.generate();
-        console.assert(nip2.validate(nip2Value) === true, nipErr + nip2Value);
+        console.assert(nip2.validate(nip2Value) === true, Util.getErrorInfo('nip') + nip2Value);
 
         const idNumber1 = new IDNumber();
         const idNumberValue = idNumber1.generate();
 
-        console.assert(idNumber1.validate(idNumberValue) === true, IDNumberErr + idNumberValue);
+        console.assert(idNumber1.validate(idNumberValue) === true, Util.getErrorInfo('ID NUMBER') + idNumberValue);
 
         const reg1 = new Regon();
         const regonValue = reg1.generate();
-        console.assert(reg1.validate(regonValue) === true, regonErr + regonValue);
-
+        console.assert(reg1.validate(regonValue) === true, Util.getErrorInfo('REGON') + regonValue);
     }
 
     testAll();
