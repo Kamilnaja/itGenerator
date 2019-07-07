@@ -6,6 +6,10 @@
             birthYear: '1988', // ex 1988
             sex: 'M', // M or F
         },
+        iban: {
+            country: 'PL',
+            spaces: 'false',
+        },
     };
 
     class Util {
@@ -55,6 +59,14 @@
 
         generate() {
             throw new Error(`Please implement me!`);
+        }
+
+        // return number values for string, starts with 10 for 'a'
+        mapToNumbers(value) {
+            if (typeof value === 'string') {
+                value = value.split('');
+            }
+            return value.map((item) => isNaN(item) ? item.charCodeAt() - 55 : item);
         }
     }
 
@@ -161,7 +173,46 @@
         constructor() {
             super();
             this.name = 'IBAN';
-            this.requiredLength = 20;
+            this.requiredLength = 28;
+        }
+
+        generate() {
+            console.log('trying to generate');
+        }
+
+        validate(iban) {
+            console.log('validate');
+            iban = iban.replace(/ /g, '');
+            iban = iban.replace(/\-/g, '');
+
+            if (iban.length !== this.requiredLength) {
+                console.log(iban);
+                console.error(`Wrong length of iban: ${iban} `);
+                return 'Wrong length';
+            } else {
+                iban = iban.split('');
+
+                for (let i = 0; i < 4; i++) {
+                    iban.push(iban.shift());
+                }
+
+                console.log(`iban: ${iban}`);
+
+                const ibanToNumbers = this.mapToNumbers(iban).map((item) => Number(item));
+                let firstPart = ibanToNumbers.slice(0, 14);
+                let secondPart = ibanToNumbers.slice(14);
+
+                // console.log('second ' + secondPart);
+
+                firstPart = Number(firstPart.join('')) % 97;
+                secondPart.unshift(firstPart);
+                console.log(firstPart);
+                console.log(`Second: ${secondPart.join('')}`);
+
+
+                // const checkSum = (this.calculateNumsSumTimesWeights(iban, true) % 11);
+                // return Number(checkSum) === Number(iban[iban.length - 1]);
+            }
         }
     }
 
@@ -421,6 +472,9 @@
 
         const id = new IDNumber();
         console.log(`idNumber: ${id.generate()}`);
+
+        const iban = new Iban();
+        console.log(`Iban: ${iban.generate()}`);
     }
 
     generate();
@@ -450,6 +504,9 @@
         const reg1 = new Regon();
         const regonValue = reg1.generate();
         console.assert(reg1.validate(regonValue) === true, Util.getErrorInfo('REGON') + regonValue);
+
+        const iban1 = new Iban();
+        console.log(iban1.validate('PL59124044615928576740197171'));
     }
 
     testAll();
