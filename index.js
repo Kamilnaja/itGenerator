@@ -10,6 +10,7 @@
             country: 'PL',
             spaces: 'false',
         },
+        debug: false,
     };
 
     class Util {
@@ -156,7 +157,7 @@
         };
 
         validate(regon) {
-            console.log(regon);
+            console.info(regon);
 
             if (regon.length !== this.requiredLength) {
                 console.error(`Wrong ${this.name} length: ${regon} `);
@@ -168,20 +169,23 @@
         };
     }
 
-    // eslint-disable-next-line no-unused-vars
     class Iban extends Generator {
         constructor() {
             super();
             this.name = 'IBAN';
             this.requiredLength = 28;
+            this.countryCode = 'PL';
         }
 
         generate() {
-            console.log('trying to generate');
+            const generatedIban = [];
+            console.info('trying to generate');
+            generatedIban.push(this.countryCode);
+            return generatedIban;
         }
 
         validate(iban) {
-            console.log(`iban: ${iban}`);
+            console.info(`iban: ${iban}`);
             iban = iban
                 .trim()
                 .replace(/\ /g, '')
@@ -189,10 +193,10 @@
                 .split('')
                 .map((item) => isNaN(item) ? item.charCodeAt() - 55 : item);
 
-            console.log(`IBAN: ${iban}`);
+            console.info(`IBAN: ${iban}`);
 
             if (iban.length !== this.requiredLength) {
-                console.log(iban);
+                console.info(iban);
                 console.error(`Wrong length of iban: ${iban} `);
                 return 'Wrong length';
             } else {
@@ -200,22 +204,22 @@
                     iban.push(iban.shift());
                 }
 
-                console.log(`IBANMORF: ${iban}`);
+                console.info(`IBANMORF: ${iban}`);
 
-                const firstPart = iban.slice(0, 15);
-                const secondPart = iban.slice(15);
+                const firstPart = iban.slice(0, 16);
+                const secondPart = iban.slice(16);
 
-                console.log(`FirstPart: ${firstPart}`);
-                console.log(`SecondPart: ${secondPart}`);
+                console.info(`FirstPart: ${firstPart}`);
+                console.info(`SecondPart: ${secondPart}`);
 
                 const firstModulo = Number(firstPart.join('')) % 97;
-                console.log(`firstModulo: ${firstModulo}`);
+                console.info(`firstModulo: ${firstModulo}`);
 
                 secondPart.unshift(firstModulo);
-                console.log(`secondPart: ${secondPart}`);
+                console.info(`secondPart: ${secondPart}`);
 
                 const checkSum = secondPart.join('') % 97;
-                console.log(`CHECKSUM: ${checkSum}`);
+                console.info(`CHECKSUM: ${checkSum}`);
 
                 return String(checkSum) === '1';
             }
@@ -454,7 +458,7 @@
         }
 
         validate(nip) {
-            console.log(`NIP: ${nip} `);
+            console.info(`NIP: ${nip} `);
 
             if (nip.length !== this.requiredLength) {
                 console.error(`Wrong length of nip: ${nip} `);
@@ -467,6 +471,10 @@
     }
 
     function generate() {
+        if (!config.debug) {
+            console.info = () => {};
+        }
+
         const pesel = new Pesel(config.pesel.birthYear, config.pesel.birthMonth, config.pesel.birthDay);
         console.log(`pesel: ${pesel.generate()} `);
 
@@ -512,7 +520,7 @@
         console.assert(reg1.validate(regonValue) === true, Util.getErrorInfo('REGON') + regonValue);
 
         const iban1 = new Iban();
-        console.log(iban1.validate('PL16194011777127473016627639'));
+        console.log(iban1.validate('PL83101010230000261395100000'));
     }
 
     testAll();
