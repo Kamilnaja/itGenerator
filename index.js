@@ -181,37 +181,43 @@
         }
 
         validate(iban) {
-            console.log('validate');
-            iban = iban.replace(/ /g, '');
-            iban = iban.replace(/\-/g, '');
+            console.log(`iban: ${iban}`);
+            iban = iban
+                .trim()
+                .replace(/\ /g, '')
+                .replace(/\-/g, '')
+                .split('')
+                .map((item) => isNaN(item) ? item.charCodeAt() - 55 : item);
+
+            console.log(`IBAN: ${iban}`);
 
             if (iban.length !== this.requiredLength) {
                 console.log(iban);
                 console.error(`Wrong length of iban: ${iban} `);
                 return 'Wrong length';
             } else {
-                iban = iban.split('');
-
                 for (let i = 0; i < 4; i++) {
                     iban.push(iban.shift());
                 }
 
-                console.log(`iban: ${iban}`);
+                console.log(`IBANMORF: ${iban}`);
 
-                const ibanToNumbers = this.mapToNumbers(iban).map((item) => Number(item));
-                let firstPart = ibanToNumbers.slice(0, 14);
-                let secondPart = ibanToNumbers.slice(14);
+                const firstPart = iban.slice(0, 15);
+                const secondPart = iban.slice(15);
 
-                // console.log('second ' + secondPart);
+                console.log(`FirstPart: ${firstPart}`);
+                console.log(`SecondPart: ${secondPart}`);
 
-                firstPart = Number(firstPart.join('')) % 97;
-                secondPart.unshift(firstPart);
-                console.log(firstPart);
-                console.log(`Second: ${secondPart.join('')}`);
+                const firstModulo = Number(firstPart.join('')) % 97;
+                console.log(`firstModulo: ${firstModulo}`);
 
+                secondPart.unshift(firstModulo);
+                console.log(`secondPart: ${secondPart}`);
 
-                // const checkSum = (this.calculateNumsSumTimesWeights(iban, true) % 11);
-                // return Number(checkSum) === Number(iban[iban.length - 1]);
+                const checkSum = secondPart.join('') % 97;
+                console.log(`CHECKSUM: ${checkSum}`);
+
+                return String(checkSum) === '1';
             }
         }
     }
@@ -506,7 +512,7 @@
         console.assert(reg1.validate(regonValue) === true, Util.getErrorInfo('REGON') + regonValue);
 
         const iban1 = new Iban();
-        console.log(iban1.validate('PL59124044615928576740197171'));
+        console.log(iban1.validate('PL16194011777127473016627639'));
     }
 
     testAll();
