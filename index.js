@@ -10,7 +10,7 @@
             country: 'PL',
             spaces: 'false',
         },
-        debug: false,
+        debugOn: true,
     };
 
     class Util {
@@ -63,11 +63,9 @@
         }
 
         // return number values for string, starts with 10 for 'a'
-        mapToNumbers(value) {
-            if (typeof value === 'string') {
-                value = value.split('');
-            }
-            return value.map((item) => isNaN(item) ? item.charCodeAt() - 55 : item);
+
+        mapToNumbers() {
+            return (item) => isNaN(item) ? item.charCodeAt() - 55 : item;
         }
     }
 
@@ -105,10 +103,6 @@
             } else if (typeof idNumber === 'string') {
                 return idNumber.split(',').map(this.mapToNumbers());
             }
-        }
-
-        mapToNumbers() {
-            return (item) => isNaN(item) ? item.charCodeAt() - 55 : item;
         }
 
         validate(idNumber) {
@@ -174,30 +168,53 @@
             super();
             this.name = 'IBAN';
             this.requiredLength = 28;
-            this.countryCode = 'PL';
+            config.iban.country ? this.countryCode = config.iban.country : this.countryCode = 'PL';
         }
 
         generate() {
-            const generatedIban = [];
+            let generatedIban = [];
             console.info('trying to generate');
             generatedIban.push(this.countryCode);
-            return generatedIban;
+
+            for (let i = 0; i < this.requiredLength - 2; i++) {
+                generatedIban.push(Util.getRandomInt(0, 9));
+            }
+
+            for (let i = 0; i < 4; i++) {
+                generatedIban.push(generatedIban.shift());
+            }
+
+            generatedIban = generatedIban.map(this.mapToNumbers());
+
+            const firstPart = generatedIban.join('').slice(0, 16);
+            const checkSum = Number(firstPart) % 97;
+            console.log(`>> cs :${checkSum} `);
+            for (let i = generatedIban.length; i < this.requiredLength; i++) {
+                generatedIban.push(0);
+            }
+
+            console.info(`>> firstGenPart: ${Number(firstPart) % 97}`);
+
+            console.info(`>> GENERATED IBAN: ${generatedIban}: length: ${generatedIban.length}`);
+            return generatedIban.join('');
         }
 
         validate(iban) {
-            console.info(`iban: ${iban}`);
+            if (typeof iban === 'object') {
+                iban = iban.join('');
+            }
+            console.info(`iban: ${iban} len: ${iban.length} `);
             iban = iban
                 .trim()
                 .replace(/\ /g, '')
                 .replace(/\-/g, '')
                 .split('')
-                .map((item) => isNaN(item) ? item.charCodeAt() - 55 : item);
+                .map(this.mapToNumbers());
 
             console.info(`IBAN: ${iban}`);
 
             if (iban.length !== this.requiredLength) {
-                console.info(iban);
-                console.error(`Wrong length of iban: ${iban} `);
+                console.error(`Wrong length of iban: ${iban} ${iban.length} `);
                 return 'Wrong length';
             } else {
                 for (let i = 0; i < 4; i++) {
@@ -471,57 +488,77 @@
     }
 
     function generate() {
-        if (!config.debug) {
-            console.info = () => {};
+        if (!config.debugOn) {
+            console.info = () => { };
         }
 
-        const pesel = new Pesel(config.pesel.birthYear, config.pesel.birthMonth, config.pesel.birthDay);
-        console.log(`pesel: ${pesel.generate()} `);
+        // const pesel = new Pesel(config.pesel.birthYear, config.pesel.birthMonth, config.pesel.birthDay);
+        // console.log(`pesel: ${pesel.generate()} `);
 
-        const nip1 = new Nip();
-        console.log(`nip: ${nip1.generate()} `);
+        // const nip1 = new Nip();
+        // console.log(`nip: ${nip1.generate()} `);
 
-        const regon = new Regon();
-        console.log(`regon: ${regon.generate()} `);
+        // const regon = new Regon();
+        // console.log(`regon: ${regon.generate()} `);
 
-        const id = new IDNumber();
-        console.log(`idNumber: ${id.generate()}`);
+        // const id = new IDNumber();
+        // console.log(`idNumber: ${id.generate()}`);
 
-        const iban = new Iban();
-        console.log(`Iban: ${iban.generate()}`);
+        // const iban = new Iban();
+        // console.log(`Iban: ${iban.generate()}`);
     }
 
     generate();
 
     function testAll() {
-        const pesel1 = new Pesel('1928', '07', '11');
-        const pesel1Value = pesel1.generate();
-        console.assert(pesel1.validate(pesel1Value) === true, Util.getErrorInfo('pesel') + pesel1Value);
+        // const pesel1 = new Pesel('1928', '07', '11');
+        // const pesel1Value = pesel1.generate();
+        // console.assert(pesel1.validate(pesel1Value) === true, Util.getErrorInfo('pesel') + pesel1Value);
 
-        const pesel2 = new Pesel('1928', '07', '12');
-        const pesel2Value = pesel2.generate();
-        console.assert(pesel2.validate(pesel2Value) === true, Util.getErrorInfo('pesel') + pesel1Value);
+        // const pesel2 = new Pesel('1928', '07', '12');
+        // const pesel2Value = pesel2.generate();
+        // console.assert(pesel2.validate(pesel2Value) === true, Util.getErrorInfo('pesel') + pesel1Value);
 
-        const nip1 = new Nip();
-        const nip1Value = nip1.generate();
-        console.assert(nip1.validate(nip1Value) === true, Util.getErrorInfo('nip') + nip1Value);
+        // const nip1 = new Nip();
+        // const nip1Value = nip1.generate();
+        // console.assert(nip1.validate(nip1Value) === true, Util.getErrorInfo('nip') + nip1Value);
 
-        const nip2 = new Nip();
-        const nip2Value = nip2.generate();
-        console.assert(nip2.validate(nip2Value) === true, Util.getErrorInfo('nip') + nip2Value);
+        // const nip2 = new Nip();
+        // const nip2Value = nip2.generate();
+        // console.assert(nip2.validate(nip2Value) === true, Util.getErrorInfo('nip') + nip2Value);
 
-        const idNumber1 = new IDNumber();
-        const idNumberValue = idNumber1.generate();
+        // const idNumber1 = new IDNumber();
+        // const idNumberValue = idNumber1.generate();
 
-        console.assert(idNumber1.validate(idNumberValue) === true, Util.getErrorInfo('ID NUMBER') + idNumberValue);
+        // console.assert(idNumber1.validate(idNumberValue) === true, Util.getErrorInfo('ID NUMBER') + idNumberValue);
 
-        const reg1 = new Regon();
-        const regonValue = reg1.generate();
-        console.assert(reg1.validate(regonValue) === true, Util.getErrorInfo('REGON') + regonValue);
+        // const reg1 = new Regon();
+        // const regonValue = reg1.generate();
+        // console.assert(reg1.validate(regonValue) === true, Util.getErrorInfo('REGON') + regonValue);
 
         const iban1 = new Iban();
-        console.log(iban1.validate('PL83101010230000261395100000'));
+        // console.assert(iban1.validate('PL83101010230000261395100000') === true, + Util.getErrorInfo);
+        console.assert(iban1.validate(iban1.generate()) === true, 'Iban is not ok');
     }
 
     testAll();
+
+    function generateIbanTest() {
+        let iban = [];
+        for (let i = 0; i < 10; i++) {
+            iban.push(
+                Util.getRandomInt(0, 9)
+            );
+        }
+        const checkSum = Number(iban.join('')) % 97;
+        iban = Number(iban.join('')) - checkSum + 1;
+
+        console.log(`CHECKSUM TEST >> ${checkSum}`);
+        console.log(Number(iban) % 97);
+
+        return iban;
+    }
+    console.log(
+        generateIbanTest()
+    );
 })();
