@@ -65,7 +65,8 @@
         // return number values for string, starts with 10 for 'a'
 
         mapToNumbers() {
-            return (item) => isNaN(item) ? item.charCodeAt() - 55 : item;
+            return (item) => {
+                return isNaN(item) ? item.charCodeAt() - 55 : item};
         }
     }
 
@@ -173,30 +174,37 @@
 
         generate() {
             let generatedIban = [];
-            console.info('trying to generate');
             generatedIban.push(this.countryCode);
 
-            for (let i = 0; i < this.requiredLength - 2; i++) {
+            for (let i = 0; i < this.requiredLength - 17; i++) {
                 generatedIban.push(Util.getRandomInt(0, 9));
             }
+
+            const tempIban = String(generatedIban);
 
             for (let i = 0; i < 4; i++) {
                 generatedIban.push(generatedIban.shift());
             }
 
-            generatedIban = generatedIban.map(this.mapToNumbers());
+            console.log(`>>>> gen ${generatedIban}`);
+            console.log(`TI: ${tempIban}`);
 
-            const firstPart = generatedIban.join('').slice(0, 16);
-            const checkSum = Number(firstPart) % 97;
-            console.log(`>> cs :${checkSum} `);
-            for (let i = generatedIban.length; i < this.requiredLength; i++) {
-                generatedIban.push(0);
-            }
+            generatedIban = generatedIban
+                .join('')
+                .split('')
+                .map(this.mapToNumbers());
 
-            console.info(`>> firstGenPart: ${Number(firstPart) % 97}`);
+            const checkSum = Number(generatedIban.join('') % 97);
+            console.log(`gib: ${generatedIban}, cs: ${checkSum}`);
+            generatedIban = String(Number(generatedIban.join('')) - checkSum + 1);
 
-            console.info(`>> GENERATED IBAN: ${generatedIban}: length: ${generatedIban.length}`);
-            return generatedIban.join('');
+            console.assert(generatedIban % 97 === 1, `wrong checkSum ${generatedIban % 97}`);
+
+            console.log(`>>>> gen ${generatedIban}`);
+
+            console.log(`>>> GENEND: ${generatedIban}, snap: ${tempIban}`);
+
+            return String(tempIban) + '0000';
         }
 
         validate(iban) {
@@ -208,13 +216,14 @@
                 .trim()
                 .replace(/\ /g, '')
                 .replace(/\-/g, '')
-                .split('')
+                .replace(/PL/g, 'P,L')
+                .split(',')
                 .map(this.mapToNumbers());
 
             console.info(`IBAN: ${iban}`);
 
-            if (iban.length !== this.requiredLength) {
-                console.error(`Wrong length of iban: ${iban} ${iban.length} `);
+            if (String(iban.join(',')).length !== this.requiredLength) {
+                console.error(`Wrong length of iban: ${iban.join(',').split(',')} ${iban.length} `);
                 return 'Wrong length';
             } else {
                 for (let i = 0; i < 4; i++) {
@@ -542,23 +551,4 @@
     }
 
     testAll();
-
-    function generateIbanTest() {
-        let iban = [];
-        for (let i = 0; i < 10; i++) {
-            iban.push(
-                Util.getRandomInt(0, 9)
-            );
-        }
-        const checkSum = Number(iban.join('')) % 97;
-        iban = Number(iban.join('')) - checkSum + 1;
-
-        console.log(`CHECKSUM TEST >> ${checkSum}`);
-        console.log(Number(iban) % 97);
-
-        return iban;
-    }
-    console.log(
-        generateIbanTest()
-    );
 })();
