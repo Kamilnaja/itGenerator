@@ -23,7 +23,7 @@ var __extends = (this && this.__extends) || (function () {
             country: 'PL',
             spaces: 'false'
         },
-        debugOn: true
+        debugOn: false
     };
     var Util = /** @class */ (function () {
         function Util() {
@@ -66,9 +66,6 @@ var __extends = (this && this.__extends) || (function () {
                 .reduce(function (a, b) { return a + b; }, 0);
         };
         ;
-        Generator.prototype.generate = function () {
-            throw new Error("Please implement me!");
-        };
         // return number values for string, starts with 10 for 'a'
         Generator.prototype.mapToNumbers = function () {
             return function (item) {
@@ -163,6 +160,48 @@ var __extends = (this && this.__extends) || (function () {
         };
         ;
         return Regon;
+    }(Generator));
+    // trying with better implementation
+    var Iban2 = /** @class */ (function (_super) {
+        __extends(Iban2, _super);
+        function Iban2() {
+            var _this = _super.call(this) || this;
+            _this.requiredLength = 28;
+            _this.name = 'IBAN';
+            _this.departmentNumber = [];
+            _this.departmentNumberLength = 8;
+            _this.departmentNumberWeights = [3, 9, 7, 1, 3, 9, 7];
+            return _this;
+        }
+        Iban2.prototype.generate = function () {
+            var _this = this;
+            // departmentNumber
+            for (var i = 0; i < this.departmentNumberLength - 1; i++) {
+                this.departmentNumber.push(Util.getRandomInt(0, 9));
+            }
+            var result = this.departmentNumber
+                .slice(0, this.departmentNumberLength - 1)
+                .map(function (item, i) { return Number(item) * _this.departmentNumberWeights[i]; })
+                .reduce(function (a, b) { return a + b; }, 0)
+                % 10; // todo - use generic
+            var checkSum = 10 - result;
+            this.departmentNumber.push(checkSum);
+            return this.departmentNumber;
+        };
+        Iban2.prototype.validate = function (value) {
+            var _this = this;
+            if (typeof value === 'number') {
+                value = String(value).split('');
+            }
+            var result = value
+                .slice(0, this.departmentNumberLength - 1)
+                .map(function (item, i) { return Number(item) * _this.departmentNumberWeights[i]; })
+                .reduce(function (a, b) { return a + b; }, 0)
+                % 10; // todo - use generic
+            var checkSum = 10 - result;
+            return Number(value[this.departmentNumberLength - 1]) === checkSum;
+        };
+        return Iban2;
     }(Generator));
     var Iban = /** @class */ (function (_super) {
         __extends(Iban, _super);
@@ -491,7 +530,7 @@ var __extends = (this && this.__extends) || (function () {
         var iban = new Iban();
         console.log("Iban: " + iban.generate());
     }
-    generate();
+    // generate();
     function testAll() {
         var pesel1 = new Pesel('1928', '07', '11');
         var pesel1Value = pesel1.generate();
@@ -511,9 +550,13 @@ var __extends = (this && this.__extends) || (function () {
         var reg1 = new Regon();
         var regonValue = reg1.generate();
         console.assert(reg1.validate(regonValue) === true, Util.getErrorInfo('REGON') + regonValue);
-        var iban1 = new Iban();
-        // console.assert(iban1.validate('PL83101010230000261395100000') === true, Util.getErrorInfo(iban1) + iban1);
-        console.assert(iban1.validate(iban1.generate()) === true, 'Iban is not ok');
+        // const iban1 = new Iban();
+        // // console.assert(iban1.validate('PL83101010230000261395100000') === true, Util.getErrorInfo(iban1) + iban1);
+        // console.assert(iban1.validate(iban1.generate()) === true, 'Iban is not ok');
+        var iban2 = new Iban2();
+        console.log(iban2.validate(10301944));
+        console.log(iban2.validate(11602202));
+        console.assert(iban2.validate(iban2.generate()) === true, 'error');
     }
     testAll();
 })();

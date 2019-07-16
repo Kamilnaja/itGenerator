@@ -10,7 +10,7 @@
             country: 'PL',
             spaces: 'false',
         },
-        debugOn: true,
+        debugOn: false,
     };
 
     class Util {
@@ -59,10 +59,7 @@
 
         abstract validate(value): boolean;
 
-        generate() {
-            throw new Error(`Please implement me!`);
-        }
-
+        abstract generate();
         // return number values for string, starts with 10 for 'a'
 
         mapToNumbers() {
@@ -164,6 +161,52 @@
                 return Number(checkSum) === Number(regon.split('')[regon.length - 1]);
             }
         };
+    }
+
+    // trying with better implementation
+    class Iban2 extends Generator {
+        private departmentNumber;
+        private departmentNumberLength: number;
+        private departmentNumberWeights: number[];
+
+        constructor() {
+            super();
+            this.requiredLength = 28;
+            this.name = 'IBAN';
+            this.departmentNumber = [];
+            this.departmentNumberLength = 8;
+            this.departmentNumberWeights = [3, 9, 7, 1, 3, 9, 7];
+        }
+
+        generate() {
+            // departmentNumber
+            for (let i = 0; i < this.departmentNumberLength - 1; i++) {
+                this.departmentNumber.push(Util.getRandomInt(0, 9));
+            }
+            const result = this.departmentNumber
+                .slice(0, this.departmentNumberLength - 1)
+                .map((item, i) => Number(item) * this.departmentNumberWeights[i])
+                .reduce((a, b) => a + b, 0)
+                % 10; // todo - use generic
+            const checkSum = 10 - result;
+            this.departmentNumber.push(checkSum);
+            return this.departmentNumber;
+        }
+
+        validate(value: number | string[]) {
+            if (typeof value === 'number') {
+                value = String(value).split('');
+            }
+
+            const result = value
+                .slice(0, this.departmentNumberLength - 1)
+                .map((item, i) => Number(item) * this.departmentNumberWeights[i])
+                .reduce((a, b) => a + b, 0)
+                % 10; // todo - use generic
+            const checkSum = 10 - result;
+
+            return Number(value[this.departmentNumberLength - 1]) === checkSum;
+        }
     }
 
     class Iban extends Generator {
@@ -527,7 +570,7 @@
         console.log(`Iban: ${iban.generate()}`);
     }
 
-    generate();
+    // generate();
 
     function testAll() {
         const pesel1 = new Pesel('1928', '07', '11');
@@ -555,10 +598,19 @@
         const regonValue = reg1.generate();
         console.assert(reg1.validate(regonValue) === true, Util.getErrorInfo('REGON') + regonValue);
 
-        const iban1 = new Iban();
-        // console.assert(iban1.validate('PL83101010230000261395100000') === true, Util.getErrorInfo(iban1) + iban1);
-        console.assert(iban1.validate(iban1.generate()) === true, 'Iban is not ok');
+        // const iban1 = new Iban();
+        // // console.assert(iban1.validate('PL83101010230000261395100000') === true, Util.getErrorInfo(iban1) + iban1);
+        // console.assert(iban1.validate(iban1.generate()) === true, 'Iban is not ok');
+
+
+        const iban2 = new Iban2();
+        console.log(iban2.validate(10301944));
+        console.log(iban2.validate(11602202));
+        console.assert(iban2.validate(iban2.generate()) === true, 'error');
+
     }
 
-    testAll();
+        testAll();
+
+
 })();
