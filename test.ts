@@ -27,7 +27,10 @@
         }
     }
 
-    class Generator {
+    abstract class Generator {
+        public requiredLength;
+        public weights;
+        public name;
         constructor() {
             this.requiredLength = 0;
             this.weights = [];
@@ -42,7 +45,7 @@
             return value;
         }
 
-        calculateNumsSumTimesWeights(value, trim) {
+        calculateNumsSumTimesWeights(value, trim?) {
             this.preparedInput(value);
             let sliceEnd;
             trim ? sliceEnd = value.length - 1 : sliceEnd = value.length;
@@ -54,9 +57,7 @@
                 .reduce((a, b) => a + b, 0);
         };
 
-        validate() {
-            throw new Error('Please implement me!');
-        };
+        abstract validate(value): boolean;
 
         generate() {
             throw new Error(`Please implement me!`);
@@ -66,7 +67,7 @@
 
         mapToNumbers() {
             return (item) => {
-                return isNaN(item) ? item.charCodeAt() - 55 : item;
+                return isNaN(item) ? item.charCodeAt() - 55 : item
             };
         }
     }
@@ -110,7 +111,7 @@
         validate(idNumber) {
             if (idNumber.length !== this.requiredLength) {
                 console.error(`Wrong ${this.name} length: ${idNumber} `);
-                return `Wrong ${this.name} length`;
+                return false;
             } else {
                 const arrToEvaluate = [];
                 for (let i = 0; i < 3; i++) {
@@ -157,7 +158,7 @@
 
             if (regon.length !== this.requiredLength) {
                 console.error(`Wrong ${this.name} length: ${regon} `);
-                return `Wrong ${this.name} length`;
+                return false;
             } else {
                 const checkSum = (this.calculateNumsSumTimesWeights(regon, true) % 11) % 10;
                 return Number(checkSum) === Number(regon.split('')[regon.length - 1]);
@@ -166,6 +167,7 @@
     }
 
     class Iban extends Generator {
+        public countryCode;
         constructor() {
             super();
             this.name = 'IBAN';
@@ -174,7 +176,7 @@
         }
 
         generate() {
-            let generatedIban = [];
+            let generatedIban: string | string[] | number = [];
             generatedIban.push(this.countryCode);
 
             for (let i = 0; i < this.requiredLength - 17; i++) {
@@ -195,11 +197,11 @@
                 .split('')
                 .map(this.mapToNumbers());
 
-            const checkSum = Number(generatedIban.join('') % 97);
+            const checkSum: number = Number(generatedIban.join('')) % 97;
             console.log(`gib: ${generatedIban}, cs: ${checkSum}`);
             generatedIban = String(Number(generatedIban.join('')) - checkSum + 1);
 
-            console.assert(generatedIban % 97 === 1, `wrong checkSum ${generatedIban % 97}`);
+            console.assert(Number(generatedIban) % 97 === 1, `wrong checkSum ${Number(generatedIban) % 97}`);
 
             console.log(`>>>> gen ${generatedIban}`);
 
@@ -225,7 +227,7 @@
 
             if (String(iban.join(',')).length !== this.requiredLength) {
                 console.error(`Wrong length of iban: ${iban.join(',').split(',')} ${iban.length} `);
-                return 'Wrong length';
+                return false;
             } else {
                 for (let i = 0; i < 4; i++) {
                     iban.push(iban.shift());
@@ -254,6 +256,13 @@
     }
 
     class Pesel extends Generator {
+        private femaleNums: number[];
+        private maleNums: number[];
+        private months: string[];
+        private year: number;
+        private month: number;
+        private day: number;
+
         constructor(year, month, day) {
             super();
             this.name = 'PESEL';
@@ -337,7 +346,7 @@
             if (Number(givenMonth) > 12 || !givenMonth) {
                 console.log(`Wrong month value: ${config.pesel.birthMonth} `);
                 month = this.generateRandomMonth();
-            } else if (config.pesel.birthMonth <= 12) {
+            } else if (Number(config.pesel.birthMonth) <= 12) {
                 month = this.calculatePeselMonth(givenMonth);
             }
             return month;
@@ -424,7 +433,7 @@
 
         // generate year from 1940 to 2019
         generateRandomYear() {
-            return randomYear = Util.getRandomInt(1940, 2019);
+            return Util.getRandomInt(1940, 2019);
         }
 
         calculateCheckSum(pesel) {
@@ -437,7 +446,7 @@
         validate(pesel) {
             if (pesel.length !== this.requiredLength) {
                 console.error('wrong length of pesel!');
-                return 'Wrong length';
+                return false;
             } else {
                 const checkSum = (10 - (this.calculateNumsSumTimesWeights(pesel, true) % 10)) % 10;
                 return Number(checkSum) === Number(pesel.split('')[pesel.length - 1]);
@@ -489,7 +498,7 @@
 
             if (nip.length !== this.requiredLength) {
                 console.error(`Wrong length of nip: ${nip} `);
-                return 'Wrong length';
+                return false;
             } else {
                 const checkSum = (this.calculateNumsSumTimesWeights(nip, true) % 11);
                 return Number(checkSum) === Number(nip.split('')[nip.length - 1]);
@@ -502,52 +511,52 @@
             console.info = () => { };
         }
 
-        // const pesel = new Pesel(config.pesel.birthYear, config.pesel.birthMonth, config.pesel.birthDay);
-        // console.log(`pesel: ${pesel.generate()} `);
+        const pesel = new Pesel(config.pesel.birthYear, config.pesel.birthMonth, config.pesel.birthDay);
+        console.log(`pesel: ${pesel.generate()} `);
 
-        // const nip1 = new Nip();
-        // console.log(`nip: ${nip1.generate()} `);
+        const nip1 = new Nip();
+        console.log(`nip: ${nip1.generate()} `);
 
-        // const regon = new Regon();
-        // console.log(`regon: ${regon.generate()} `);
+        const regon = new Regon();
+        console.log(`regon: ${regon.generate()} `);
 
-        // const id = new IDNumber();
-        // console.log(`idNumber: ${id.generate()}`);
+        const id = new IDNumber();
+        console.log(`idNumber: ${id.generate()}`);
 
-        // const iban = new Iban();
-        // console.log(`Iban: ${iban.generate()}`);
+        const iban = new Iban();
+        console.log(`Iban: ${iban.generate()}`);
     }
 
     generate();
 
     function testAll() {
-        // const pesel1 = new Pesel('1928', '07', '11');
-        // const pesel1Value = pesel1.generate();
-        // console.assert(pesel1.validate(pesel1Value) === true, Util.getErrorInfo('pesel') + pesel1Value);
+        const pesel1 = new Pesel('1928', '07', '11');
+        const pesel1Value = pesel1.generate();
+        console.assert(pesel1.validate(pesel1Value) === true, Util.getErrorInfo('pesel') + pesel1Value);
 
-        // const pesel2 = new Pesel('1928', '07', '12');
-        // const pesel2Value = pesel2.generate();
-        // console.assert(pesel2.validate(pesel2Value) === true, Util.getErrorInfo('pesel') + pesel1Value);
+        const pesel2 = new Pesel('1928', '07', '12');
+        const pesel2Value = pesel2.generate();
+        console.assert(pesel2.validate(pesel2Value) === true, Util.getErrorInfo('pesel') + pesel1Value);
 
-        // const nip1 = new Nip();
-        // const nip1Value = nip1.generate();
-        // console.assert(nip1.validate(nip1Value) === true, Util.getErrorInfo('nip') + nip1Value);
+        const nip1 = new Nip();
+        const nip1Value = nip1.generate();
+        console.assert(nip1.validate(nip1Value) === true, Util.getErrorInfo('nip') + nip1Value);
 
-        // const nip2 = new Nip();
-        // const nip2Value = nip2.generate();
-        // console.assert(nip2.validate(nip2Value) === true, Util.getErrorInfo('nip') + nip2Value);
+        const nip2 = new Nip();
+        const nip2Value = nip2.generate();
+        console.assert(nip2.validate(nip2Value) === true, Util.getErrorInfo('nip') + nip2Value);
 
-        // const idNumber1 = new IDNumber();
-        // const idNumberValue = idNumber1.generate();
+        const idNumber1 = new IDNumber();
+        const idNumberValue = idNumber1.generate();
 
-        // console.assert(idNumber1.validate(idNumberValue) === true, Util.getErrorInfo('ID NUMBER') + idNumberValue);
+        console.assert(idNumber1.validate(idNumberValue) === true, Util.getErrorInfo('ID NUMBER') + idNumberValue);
 
-        // const reg1 = new Regon();
-        // const regonValue = reg1.generate();
-        // console.assert(reg1.validate(regonValue) === true, Util.getErrorInfo('REGON') + regonValue);
+        const reg1 = new Regon();
+        const regonValue = reg1.generate();
+        console.assert(reg1.validate(regonValue) === true, Util.getErrorInfo('REGON') + regonValue);
 
         const iban1 = new Iban();
-        // console.assert(iban1.validate('PL83101010230000261395100000') === true, + Util.getErrorInfo);
+        // console.assert(iban1.validate('PL83101010230000261395100000') === true, Util.getErrorInfo(iban1) + iban1);
         console.assert(iban1.validate(iban1.generate()) === true, 'Iban is not ok');
     }
 
